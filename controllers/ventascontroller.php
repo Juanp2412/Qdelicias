@@ -3,58 +3,60 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once "../config/conexion.php";
+require_once "../services/VentaService.php";
+
+header("Content-Type: application/json; charset=utf-8");
+
+function responderJson(int $statusCode, array $payload): void
+{
+    http_response_code($statusCode);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    exit();
+}
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (!$data) {
-    echo "Error: no llegaron datos";
-    exit();
+    responderJson(400, [
+        'success' => false,
+        'message' => 'Error: no llegaron datos',
+    ]);
 }
 
-$carrito = $data['carrito'];
-$total = $data['total'];
+$carrito = $data['carrito'] ?? [];
+$modo = $data['modo'] ?? 'guardar';
 
 if (empty($carrito)) {
-    echo "Error: carrito vacío";
-    exit();
+    responderJson(400, [
+        'success' => false,
+        'message' => 'Error: carrito vacío',
+    ]);
 }
 
-if (!$conn->query("INSERT INTO ventas (total) VALUES ($total)")) {
-    echo "Error en venta: " . $conn->error;
-    exit();
-}
+try {
+    $ventaService = new VentaService($conn);
 
-$venta_id = $conn->insert_id;
+    if ($modo === 'calcular') {
+        $calculo = $ventaService->calcularVenta($carrito);
 
-foreach ($carrito as $item) {
-    $producto_id = (int)$item['id'];
-    $cantidad = (int)$item['cantidad'];
-    $precioBase = (float)$item['precio_base'];
-
-    if (!$conn->query("INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio)
-                      VALUES ($venta_id, $producto_id, $cantidad, $precioBase)")) {
-        echo "Error en detalle: " . $conn->error;
-        exit();
+        responderJson(200, [
+            'success' => true,
+            'message' => 'Cálculo generado correctamente',
+            'venta' => $calculo,
+        ]);
     }
 
-    $detalle_venta_id = $conn->insert_id;
+    $resultado = $ventaService->registrarVenta($carrito);
 
-    if (!empty($item['extras'])) {
-        foreach ($item['extras'] as $extra) {
-            $extra_id = (int)$extra['id'];
-            $cantidad_extra = (int)$extra['cantidad'];
-
-            for ($i = 1; $i <= $cantidad_extra; $i++) {
-                $precio_extra = ($i <= (int)$extra['cantidad_incluida']) ? 0 : (float)$extra['precio'];
-
-                if (!$conn->query("INSERT INTO detalle_venta_extras (detalle_venta_id, extra_id, precio)
-                                  VALUES ($detalle_venta_id, $extra_id, $precio_extra)")) {
-                    echo "Error en extra: " . $conn->error;
-                    exit();
-                }
-            }
-        }
-    }
+    responderJson(200, [
+        'success' => true,
+        'message' => 'Venta guardada correctamente',
+        'venta_id' => $resultado['venta_id'],
+        'venta' => $resultado['venta'],
+    ]);
+} catch (Throwable $e) {
+    responderJson(500, [
+        'success' => false,
+        'message' => 'Error al guardar venta: ' . $e->getMessage(),
+    ]);
 }
-
-echo "Venta guardada correctamente";
