@@ -5,26 +5,58 @@ ini_set('display_errors', 1);
 require_once "../config/conexion.php";
 require_once "../services/VentaService.php";
 
-$data = json_decode(file_get_contents("php://input"), true);
+header("Content-Type: application/json; charset=utf-8");
 
-if (!$data) {
-    echo "Error: no llegaron datos";
+function responderJson(int $statusCode, array $payload): void
+{
+    http_response_code($statusCode);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit();
 }
 
+$data = json_decode(file_get_contents("php://input"), true);
+
+if (!$data) {
+    responderJson(400, [
+        'success' => false,
+        'message' => 'Error: no llegaron datos',
+    ]);
+}
+
 $carrito = $data['carrito'] ?? [];
+$modo = $data['modo'] ?? 'guardar';
 
 if (empty($carrito)) {
-    echo "Error: carrito vacío";
-    exit();
+    responderJson(400, [
+        'success' => false,
+        'message' => 'Error: carrito vacío',
+    ]);
 }
 
 try {
     $ventaService = new VentaService($conn);
-    $ventaService->registrarVenta($carrito);
 
-    echo "Venta guardada correctamente";
+    if ($modo === 'calcular') {
+        $calculo = $ventaService->calcularVenta($carrito);
+
+        responderJson(200, [
+            'success' => true,
+            'message' => 'Cálculo generado correctamente',
+            'venta' => $calculo,
+        ]);
+    }
+
+    $resultado = $ventaService->registrarVenta($carrito);
+
+    responderJson(200, [
+        'success' => true,
+        'message' => 'Venta guardada correctamente',
+        'venta_id' => $resultado['venta_id'],
+        'venta' => $resultado['venta'],
+    ]);
 } catch (Throwable $e) {
-    http_response_code(500);
-    echo "Error al guardar venta: " . $e->getMessage();
+    responderJson(500, [
+        'success' => false,
+        'message' => 'Error al guardar venta: ' . $e->getMessage(),
+    ]);
 }
