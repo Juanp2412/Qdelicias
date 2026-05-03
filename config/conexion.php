@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
 $user = "root";
-$pass = "";
+$pass = "password";
 $db = "qdelicias_pos";
 
 $conn = new mysqli($host, $user, $pass, $db);

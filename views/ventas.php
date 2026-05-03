@@ -36,7 +36,26 @@ header("Expires: 0");
 
 $productos = $conn->query("SELECT * FROM productos ORDER BY nombre ASC");
 $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+$categoriasData = [];
+$categoriasNombrePorId = [];
+$categoriaChipTemas = [];
+$temasChip = [
+    ['bg' => '#eef9ee', 'color' => '#4f8b51', 'border' => '#d7edd8'],
+    ['bg' => '#eaf4ff', 'color' => '#3b6ea8', 'border' => '#d2e6ff'],
+    ['bg' => '#fff2ea', 'color' => '#c05c2d', 'border' => '#ffd8c2'],
+    ['bg' => '#f4edff', 'color' => '#6e54a9', 'border' => '#e1d4ff'],
+    ['bg' => '#fff8e8', 'color' => '#9d7b2c', 'border' => '#ffe6b5']
+];
 $saboresPorProducto = [];
+
+while ($cat = $categorias->fetch_assoc()) {
+    $catId = (int)$cat['id'];
+    $temIndex = $catId % count($temasChip);
+
+    $categoriasData[] = $cat;
+    $categoriasNombrePorId[$catId] = $cat['nombre'];
+    $categoriaChipTemas[$catId] = $temasChip[$temIndex];
+}
 
 $sqlSabores = "SELECT ps.producto_id, s.id, s.nombre
                FROM producto_sabores ps
@@ -86,85 +105,101 @@ while ($e = $extras->fetch_assoc()) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ventas - QDelicias POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <style>
 :root {
-    --dark:#17191d;
-    --purple:#7c3aed;
-    --pink:#ec4899;
-    --green:#15803d;
-    --bg:#f6f2fb;
-    --border:#e5e7eb;
-    --muted:#6b7280
+    --bg:#f3f4f6;
+    --panel:#ffffff;
+    --panel-soft:#f8fafc;
+    --line:#e5e7eb;
+    --text:#111827;
+    --muted:#6b7280;
+    --primary:#000;
+    --primary-strong:#ea580c;
+    --primary-soft:#fff7ed;
+    --success:#16a34a
 }
 
 body {
-    background:radial-gradient(circle at top left,#fff7ed 0,#f7f2ff 35%,#f8fafc 80%);
+    background:
+        radial-gradient(circle at 0% 0%,rgba(249,115,22,.08),transparent 30%),
+        radial-gradient(circle at 100% 100%,rgba(59,130,246,.07),transparent 26%),
+        var(--bg);
+    font-family:"Plus Jakarta Sans", "Segoe UI", sans-serif;
+    color:var(--text);
     font-size:14px
 }
 
 .pos-shell {
-    padding:14px
+    padding:16px
 }
 
 .top-bar {
-    background:linear-gradient(135deg,#111827,#20242b);
-    color:white;
+    background:var(--panel);
+    color:var(--text);
     padding:14px 16px;
-    border-radius:16px;
+    border-radius:14px;
     margin-bottom:14px;
-    box-shadow:0 10px 28px rgba(17,24,39,.18)
+    border:1px solid var(--line);
+    box-shadow:0 8px 24px rgba(15,23,42,.05)
 }
 
 .brand-title {
     font-size:22px;
-    font-weight:900
+    font-weight:800;
+    letter-spacing:-.2px
 }
 
 .brand-subtitle {
-    color:#d1d5db;
+    color:var(--muted);
     font-size:12px
 }
 
 .layout-grid {
     display:grid;
-    grid-template-columns:210px minmax(430px,1fr) 550px;
+    grid-template-columns:170px minmax(0,1fr) clamp(280px,30vw,390px);
     gap:14px;
     align-items:start
 }
 
 .panel-card {
-    background:rgba(255,255,255,.95);
-    border:1px solid var(--border);
-    border-radius:18px;
-    box-shadow:0 12px 30px rgba(15,23,42,.08)
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:0 10px 26px rgba(15,23,42,.05)
 }
 
 .side-panel {
-    padding:14px;
+    padding:12px;
     position:sticky;
-    top:14px;
+    top:16px;
+    background:var(--panel-soft);
     min-height:calc(100vh - 110px)
 }
 
 .products-panel {
     padding:14px;
-    min-height:calc(100vh - 110px)
+    min-height:calc(100vh - 110px);
+    min-width:0
 }
 
 .cart-panel {
     padding:12px;
     position:sticky;
-    top:14px;
+    top:16px;
     max-height:calc(100vh - 28px);
-    overflow:auto
+    overflow:auto;
+    min-width:0
 }
 
 .section-title {
-    font-size:18px;
-    font-weight:900;
+    font-size:17px;
+    font-weight:800;
     margin:0;
-    color:#111827
+    color:var(--text)
 }
 
 .section-help {
@@ -174,19 +209,24 @@ body {
 
 .btn-categoria {
     width:100%;
-    border-radius:12px;
-    padding:10px 11px;
-    margin-bottom:8px;
+    border-radius:10px;
+    padding:9px 10px;
+    margin-bottom:6px;
     font-weight:700;
+    font-size:12px;
     text-align:left;
     display:flex;
     align-items:center;
-    justify-content:space-between
+    justify-content:space-between;
+    border-color:#d1d5db;
+    color:#374151;
+    background:#fff
 }
 
 .btn-categoria.btn-dark {
-    background:#111827;
-    border-color:#111827
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff
 }
 
 .toolbar {
@@ -198,145 +238,249 @@ body {
 }
 
 .search-box {
-    max-width:360px;
+    max-width:340px;
     border-radius:12px;
-    padding:10px 13px
+    padding:10px 13px;
+    border:1px solid #d1d5db
 }
 
 .productos-grid {
     display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:12px
 }
 
 .producto-btn {
     width:100%;
-    min-height:150px;
-    border-radius:18px;
-    border:1px solid #dbeafe;
+    min-height:208px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
     background:#fff;
-    padding:0;
+    padding:10px;
     text-align:left;
     overflow:hidden;
-    box-shadow:0 8px 18px rgba(37,99,235,.08);
-    transition:.12s
+    box-shadow:0 6px 16px rgba(17,24,39,.05);
+    transition:.16s ease;
+    display:flex;
+    flex-direction:column;
+    gap:10px
 }
 
 .producto-btn:hover {
     transform:translateY(-2px);
-    box-shadow:0 14px 26px rgba(124,58,237,.16);
-    border-color:var(--purple)
+    box-shadow:0 12px 20px rgba(17,24,39,.10);
+    border-color:#fdba74
 }
 
 .producto-img {
-    height:82px;
-    background:linear-gradient(135deg,#fde68a,#f0abfc,#c4b5fd);
+    height:114px;
+    background:#f3f4f6;
     display:flex;
     align-items:center;
     justify-content:center;
-    color:#fff;
-    font-size:34px;
-    font-weight:900
+    color:#9ca3af;
+    font-size:32px;
+    font-weight:800;
+    border-radius:12px;
+    border:1px solid #edf0f4;
+    overflow:hidden;
+    padding:0
 }
 
 .producto-img img {
     width:100%;
     height:100%;
     object-fit:cover;
+    border-radius:0;
+    border:0;
+    box-shadow:none;
+    padding:0;
     display:block
 }
 
 .producto-body {
-    padding:11px 12px 12px
+    padding:0 2px 2px
 }
 
 .producto-nombre {
     font-size:14px;
-    font-weight:850;
-    color:#111827;
-    line-height:1.2;
-    min-height:34px
+    font-weight:800;
+    color:var(--text);
+    line-height:1.3;
+    min-height:34px;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden
 }
 
 .precio-text {
-    display:block;
-    color:var(--purple);
-    font-size:15px;
-    font-weight:900;
-    margin-top:6px
+    display:inline-flex;
+    align-items:center;
+    color:#1f2937;
+    font-size:16px;
+    font-weight:800;
+    line-height:1.1;
+    letter-spacing:0;
+    padding:3px 8px;
+    border-radius:8px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb
 }
 
 .tipo-chip {
-    font-size:10px;
-    padding:3px 7px;
-    border-radius:999px;
-    background:#f3e8ff;
-    color:#6d28d9;
-    font-weight:800
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:8px;
+    font-weight:700
+}
+
+.producto-meta {
+    margin-top:6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px
+}
+
+.producto-precio {
+    display:flex;
+    align-items:center;
+    font-weight:800;
+    color:#111827
 }
 
 .table {
     font-size:12px;
-    margin-bottom:10px
+    margin-bottom:10px;
+    border-color:#eceff3
 }
 
 .table thead th {
-    background:#15191f!important;
-    color:#fff;
-    border-color:#15191f!important
+    background:#f8fafc!important;
+    color:#374151;
+    border-color:#eceff3!important;
+    font-weight:700
+}
+
+.table tbody td {
+    border-color:#eceff3
 }
 
 .detalle-extra {
     font-size:11px;
-    color:#6b7280;
+    color:var(--muted);
     display:block;
     margin-top:4px;
     line-height:1.3
 }
 
 .total-box {
-    background:linear-gradient(135deg,#16a34a,#15803d);
-    color:white;
-    border-radius:18px;
-    padding:18px;
+    background:linear-gradient(145deg,#fff,#fff7ed);
+    color:var(--text);
+    border:1px solid #fed7aa;
+    border-radius:14px;
+    padding:14px;
     text-align:center;
-    font-size:28px;
-    font-weight:900;
-    box-shadow:0 12px 24px rgba(22,163,74,.20)
+    font-size:30px;
+    font-weight:800;
+    box-shadow:0 10px 24px rgba(249,115,22,.12)
 }
 
 .payment-card,.payment-summary {
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:12px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
     background:#fff
 }
 
 .payment-summary {
     background:#f8fafc;
-    font-size:13px
+    font-size:15px
 }
 
-.quick-pay-grid {
+.quick-pay-grid-top,.quick-pay-grid-bottom {
     display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:6px
+    gap:15px
 }
 
-.quick-pay-grid .btn,.acciones-finales .btn {
-    border-radius:12px;
+.quick-pay-grid-top {
+    grid-template-columns:repeat(3,1fr)
+}
+
+.quick-pay-grid-bottom {
+    grid-template-columns:repeat(2,1fr)
+}
+
+.btn-pago-metodo {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    border-radius:10px;
+    padding:8px 6px;
+    font-weight:700;
+    font-size:12px;
+    min-height:78px;
+    border:none!important;
+    background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(248,250,252,.94))!important;
+    box-shadow:inset 0 0 0 1px rgba(148,163,184,.24),0 3px 10px rgba(15,23,42,.06);
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease,transform .2s ease
+}
+
+.btn-pago-metodo:hover {
+    background:#0f766e!important;
+    color:#fff!important;
+    box-shadow:0 8px 18px rgba(15,118,110,.24);
+    transform:translateY(-1px)
+}
+
+.btn-pago-metodo .pago-icon {
+    font-size:24px;
+    line-height:1
+}
+
+.btn-pago-metodo .pago-imagen {
+    height:32px;
+    width:auto;
+    max-width:100%;
+    object-fit:contain;
+    line-height:1
+}
+
+.btn-pago-metodo .pago-nombre {
+    font-size:11px
+}
+
+.cart-panel .table-responsive {
+    margin-bottom:12px
+}
+
+.cart-panel .total-box {
+    margin-bottom:12px!important
+}
+
+.cart-panel .payment-card {
+    margin-bottom:12px!important
+}
+
+.payment-card .payment-summary {
+    margin-top:10px
+}
+
+.acciones-finales .btn {
+    border-radius:10px;
     padding:7px 6px;
-    font-weight:900;
+    font-weight:700;
     font-size:12px;
     min-height:36px
 }
 
-
-
-.quick-pay-grid .btn.active-pay {
-    background:#111827!important;
+.btn-pago-metodo.active-pay {
+    background:var(--primary)!important;
     color:#fff!important;
-    border-color:#111827!important
+    box-shadow:0 8px 18px rgba(15,23,42,.22)
 }
 
 .payment-inputs {
@@ -382,7 +526,34 @@ body {
 }
 
 .form-control {
-    border-radius:12px
+    border-radius:10px;
+    border-color:#d1d5db
+}
+
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-outline-primary:hover {
+    border-color:var(--primary-strong)
+}
+
+.btn-success {
+    background:var(--success);
+    border-color:var(--success)
+}
+
+.btn-success:hover {
+    background:#15803d;
+    border-color:#15803d
+}
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.producto-btn:focus-visible,
+.btn-categoria:focus-visible {
+    outline:none;
+    box-shadow:0 0 0 3px rgba(249,115,22,.28)!important;
+    border-color:#fb923c!important
 }
 
 .acciones-finales {
@@ -392,24 +563,62 @@ body {
 }
 
 .modal-content {
-    border-radius:20px;
-    border:0;
+    border-radius:14px;
+    border:1px solid var(--line);
     overflow:hidden
 }
 
-.modal-product-header {
-    background:linear-gradient(135deg,#faf5ff,#fff7ed);
-    border:1px solid var(--border);
-    border-radius:16px;
+#modalProducto .modal-header {
+    position:sticky;
+    top:0;
+    z-index:3;
+    background:#fff;
+    border-bottom:1px solid var(--line)
+}
+
+#modalProducto .modal-body {
     padding:14px
 }
 
-.extra-item {
-    border:1px solid #dee2e6;
+#modalProducto .modal-footer {
+    position:sticky;
+    bottom:0;
+    z-index:3;
+    background:#fff;
+    border-top:1px solid var(--line)
+}
+
+#modalExtrasContenido .row {
+    --bs-gutter-x:.75rem;
+    --bs-gutter-y:.75rem
+}
+
+.modal-product-header {
+    background:linear-gradient(135deg,#fff,#fff7ed);
+    border:1px solid var(--line);
     border-radius:12px;
-    padding:10px;
+    padding:14px
+}
+
+.modal-extra-title {
+    font-size:20px;
+    font-weight:800;
+    color:#1f2937;
     margin-bottom:10px;
-    background:#fff
+    border-bottom:1px solid #e5e7eb;
+    padding-bottom:8px
+}
+
+.extra-item {
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:10px 12px;
+    margin-bottom:0;
+    background:linear-gradient(180deg,#fff,#f8fafc);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px
 }
 
 .extra-cantidad {
@@ -418,17 +627,71 @@ body {
     font-weight:bold
 }
 
+.qty-controls {
+    display:flex;
+    align-items:center;
+    gap:6px
+}
+
+.qty-btn {
+    width:28px;
+    height:28px;
+    border-radius:8px;
+    border:none;
+    font-weight:800;
+    line-height:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center
+}
+
+.qty-btn.minus {
+    background:#fee2e2;
+    color:#b91c1c
+}
+
+.qty-btn.plus {
+    background:#dcfce7;
+    color:#15803d
+}
+
+.qty-value {
+    min-width:22px;
+    text-align:center;
+    font-weight:800;
+    color:#111827
+}
+
+@media(min-width:1600px) {
+    .productos-grid {
+        grid-template-columns:repeat(5,minmax(0,1fr))
+    }
+}
+
+@media(max-width:1360px) {
+    .productos-grid {
+        grid-template-columns:repeat(3,minmax(0,1fr))
+    }
+}
+
 @media(max-width:1200px) {
     .layout-grid {
-        grid-template-columns:190px 1fr
+        grid-template-columns:160px minmax(0,1fr) 320px
     }
 
-    .cart-panel {
-        grid-column:1/-1;
-        position:relative;
-        max-height:none
+    .productos-grid {
+        grid-template-columns:repeat(3,minmax(0,1fr))
+    }
+}
+
+@media(max-width:1100px) {
+    .layout-grid {
+        grid-template-columns:140px minmax(0,1fr) 300px
     }
 
+    .productos-grid {
+        grid-template-columns:repeat(auto-fit,minmax(215px,1fr))
+    }
 }
 
 @media(max-width:768px) {
@@ -443,8 +706,40 @@ body {
         margin-bottom:12px
     }
 
+    .side-panel {
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+        gap:8px;
+        padding:10px;
+        margin-bottom:18px
+    }
+
+    .side-panel .section-title {
+        grid-column:1/-1;
+        margin-bottom:2px
+    }
+
+    .side-panel .btn-categoria {
+        margin-bottom:0;
+        min-height:42px;
+        padding:8px 10px;
+        font-size:12px
+    }
+
     .productos-grid {
         grid-template-columns:repeat(2,minmax(0,1fr))
+    }
+
+    .producto-btn {
+        min-height:194px
+    }
+
+    .producto-img {
+        height:102px
+    }
+
+    .precio-text {
+        font-size:14px
     }
 
     .toolbar {
@@ -456,10 +751,151 @@ body {
         max-width:100%
     }
 
-    .quick-pay-grid {
+    .cart-panel {
+        padding:10px
+    }
+
+    .cart-panel .section-title {
+        font-size:15px
+    }
+
+    .cart-panel .section-help {
+        font-size:11px
+    }
+
+    .cart-panel .table {
+        font-size:11px;
+        margin-bottom:8px
+    }
+
+    .cart-panel .table th,
+    .cart-panel .table td {
+        padding:.42rem .35rem
+    }
+
+    .cart-panel .total-box {
+        font-size:24px;
+        padding:12px
+    }
+
+    .payment-card,
+    .payment-summary {
+        padding:10px
+    }
+
+    .quick-pay-grid-top,.quick-pay-grid-bottom {
+        gap:8px
+    }
+
+    .quick-pay-grid-top {
+        grid-template-columns:repeat(3,1fr)
+    }
+
+    .quick-pay-grid-bottom {
+        grid-template-columns:repeat(2,1fr)
+    }
+
+    .btn-pago-metodo {
+        min-height:54px;
+        gap:2px;
+        padding:5px 3px
+    }
+
+    .btn-pago-metodo .pago-imagen {
+        height:20px
+    }
+
+    .btn-pago-metodo .pago-icon {
+        font-size:17px
+    }
+
+    .btn-pago-metodo .pago-nombre {
+        font-size:9px
+    }
+
+    #modalProducto .modal-dialog {
+        margin:.4rem
+    }
+
+    #modalProducto .modal-body {
+        padding:10px
+    }
+
+    .modal-extra-title {
+        font-size:15px;
+        margin-bottom:8px
+    }
+
+    .extra-item {
+        padding:9px 10px
+    }
+
+    .qty-btn {
+        width:30px;
+        height:30px
+    }
+
+}
+
+@media(max-width:520px) {
+    .productos-grid {
         grid-template-columns:1fr
     }
 
+    .side-panel {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:7px;
+        padding:9px;
+        margin-bottom:16px
+    }
+
+    .side-panel .btn-categoria {
+        min-height:40px;
+        padding:7px 8px;
+        font-size:11px
+    }
+
+    .quick-pay-grid-top,.quick-pay-grid-bottom {
+        gap:6px
+    }
+
+    .quick-pay-grid-top {
+        grid-template-columns:repeat(3,1fr)
+    }
+
+    .quick-pay-grid-bottom {
+        grid-template-columns:repeat(2,1fr)
+    }
+
+    .btn-pago-metodo {
+        min-height:50px;
+        padding:4px 3px
+    }
+
+    .btn-pago-metodo .pago-imagen {
+        height:18px
+    }
+
+    .btn-pago-metodo .pago-icon {
+        font-size:15px
+    }
+
+    .btn-pago-metodo .pago-nombre {
+        font-size:8px
+    }
+
+    .cart-panel .table-responsive {
+        overflow-x:auto
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    *,
+    *::before,
+    *::after {
+        transition:none!important;
+        animation:none!important
+    }
 }
 </style>
 </head>
@@ -492,18 +928,17 @@ body {
 
             <h5 class="section-title">Categorías</h5>
 
-            <div class="section-help mb-3">
-                Filtra rápido la venta
-            </div>
+            <div class="mb-2"></div>
 
             <button class="btn btn-dark btn-categoria" onclick="filtrarCategoria(0, this)">
                 <span>Todas</span>
                 <span>›</span>
             </button>
 
-            <?php while ($cat = $categorias->fetch_assoc()) { ?>
+            <?php foreach ($categoriasData as $cat) { ?>
 
                 <button
+                    type="button"
                     class="btn btn-outline-primary btn-categoria"
                     onclick="filtrarCategoria(<?php echo (int)$cat['id']; ?>, this)"
                 >
@@ -531,7 +966,7 @@ body {
                     type="text"
                     id="buscadorProductos"
                     class="form-control search-box"
-                    placeholder="Buscar producto..."
+                    placeholder="Buscar en productos..."
                     oninput="buscarProductos()"
                 >
 
@@ -544,7 +979,10 @@ body {
 
                 while ($p = $productos->fetch_assoc()) {
                     $imagenProducto = isset($p['imagen']) ? trim($p['imagen']) : '';
-                    $inicial = mb_substr($p['nombre'], 0, 1, 'UTF-8');
+                    $inicial = substr($p['nombre'], 0, 1);
+                    $categoriaId = (int)$p['categoria_id'];
+                    $categoriaNombre = $categoriasNombrePorId[$categoriaId] ?? 'Sin categoria';
+                    $categoriaTema = $categoriaChipTemas[$categoriaId] ?? ['bg' => '#f3f4f6', 'color' => '#4b5563', 'border' => '#d1d5db'];
                 ?>
 
                     <div
@@ -554,6 +992,7 @@ body {
                     >
 
                         <button
+                            type="button"
                             class="producto-btn"
                             onclick="abrirModalProducto(
                                 <?php echo (int)$p['id']; ?>,
@@ -581,21 +1020,24 @@ body {
 
                             <div class="producto-body">
 
-                                <div class="d-flex justify-content-between gap-2 align-items-start">
+                                <div class="producto-nombre">
+                                    <?php echo htmlspecialchars($p['nombre']); ?>
+                                </div>
 
-                                    <div class="producto-nombre">
-                                        <?php echo htmlspecialchars($p['nombre']); ?>
-                                    </div>
+                                <div class="producto-meta">
 
-                                    <span class="tipo-chip">
-                                        <?php echo htmlspecialchars($p['tipo_configuracion']); ?>
+                                    <span
+                                        class="tipo-chip"
+                                        style="background:<?php echo htmlspecialchars($categoriaTema['bg']); ?>;color:<?php echo htmlspecialchars($categoriaTema['color']); ?>;border:1px solid <?php echo htmlspecialchars($categoriaTema['border']); ?>"
+                                    >
+                                        <?php echo htmlspecialchars($categoriaNombre); ?>
+                                    </span>
+
+                                    <span class="producto-precio" aria-label="Precio $ <?php echo number_format($p['precio'], 0, ',', '.'); ?>">
+                                        <span class="precio-text">$ <?php echo number_format($p['precio'], 0, ',', '.'); ?></span>
                                     </span>
 
                                 </div>
-
-                                <span class="precio-text">
-                                    $ <?php echo number_format($p['precio'], 0, ',', '.'); ?>
-                                </span>
 
                             </div>
 
@@ -631,6 +1073,8 @@ body {
 
                 <table class="table table-bordered align-middle" id="tabla">
 
+                    <caption class="visually-hidden">Resumen de productos del carrito actual</caption>
+
                     <thead>
                         <tr>
                             <th>Detalle</th>
@@ -657,48 +1101,58 @@ body {
                     <span class="section-help">Rápido o mixto</span>
                 </div>
 
-                <div class="quick-pay-grid mb-2">
-
+                <div class="quick-pay-grid-top mb-2">
                     <button
                         type="button"
-                        class="btn btn-outline-success btn-pago-rapido"
+                        class="btn btn-outline-success btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('efectivo', this)"
                     >
-                        💵 Efectivo
+                        <img src="../assets/img/pagos/efectivo.png" alt="Efectivo" class="pago-imagen">
+                        <span class="pago-nombre">Efectivo</span>
                     </button>
 
                     <button
                         type="button"
-                        class="btn btn-outline-primary btn-pago-rapido"
+                        class="btn btn-outline-primary btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('nequi', this)"
                     >
-                        📱 Nequi
+                        <img src="../assets/img/pagos/nequi.png" alt="Nequi" class="pago-imagen">
+                        <span class="pago-nombre">Nequi</span>
                     </button>
 
                     <button
                         type="button"
-                        class="btn btn-outline-info btn-pago-rapido"
+                        class="btn btn-outline-info btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('daviplata', this)"
                     >
-                        🟣 Daviplata
+                        <img src="../assets/img/pagos/Daviplata.png" alt="Daviplata" class="pago-imagen">
+                        <span class="pago-nombre">Daviplata</span>
                     </button>
+                </div>
 
+                <div class="quick-pay-grid-bottom mb-2">
                     <button
                         type="button"
-                        class="btn btn-outline-secondary btn-pago-rapido"
+                        class="btn btn-outline-secondary btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('transferencia', this)"
                     >
-                        🏦 Transf.
+                        <span class="pago-icon">🏦</span>
+                        <span class="pago-nombre">Transferencia</span>
                     </button>
 
                     <button
                         type="button"
-                        class="btn btn-outline-dark btn-pago-rapido"
+                        class="btn btn-outline-dark btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="activarPagoMixto(this)"
                     >
-                        🔀 Mixto
+                        <span class="pago-icon">➕</span>
+                        <span class="pago-nombre">Mixto</span>
                     </button>
-
                 </div>
 
                 <div class="payment-inputs" id="paymentInputs">
@@ -761,7 +1215,7 @@ body {
 
                 </div>
 
-                <div id="boxCambioEfectivo" class="cambio-efectivo-box mt-2">
+                <div id="boxCambioEfectivo" class="cambio-efectivo-box mt-2 d-none">
                     <label class="form-label fw-bold mb-1">
                         ¿Con cuánto paga el cliente?
                     </label>
@@ -812,16 +1266,12 @@ body {
             <div class="acciones-finales">
 
                 <button
-                    class="btn btn-success flex-fill"
+                    class="btn btn-success w-100"
                     id="btnGuardarVenta"
                     onclick="guardarVenta()"
                     disabled
                 >
-                    Guardar venta
-                </button>
-
-                <button class="btn btn-secondary flex-fill" onclick="vaciarCarrito()">
-                    Vaciar carrito
+                    ✔ Guardar venta
                 </button>
 
             </div>
@@ -837,6 +1287,7 @@ body {
 let carrito = [];
 let total = 0;
 let productoSeleccionado = null;
+let pagoAutoSeleccionado = false;
 function filtrarCategoria(categoriaId, boton = null) {
     const productos = document.querySelectorAll(".producto-item");
 
@@ -872,6 +1323,14 @@ function buscarProductos() {
 }
 function abrirModalProducto(id, nombre, precio, tipo) {
     productoSeleccionado = { id, nombre, precio, tipo };
+
+    // Productos simples: agregar directamente sin abrir modal
+    if (tipo === 'simple') {
+        limpiarExtrasSeleccionados();
+        limpiarSaboresSeleccionados();
+        agregarProductoConExtras(id, nombre, precio);
+        return;
+    }
 
     limpiarExtrasSeleccionados();
     limpiarSaboresSeleccionados();
@@ -930,7 +1389,7 @@ function renderExtrasEnModal(productoId) {
     Object.keys(extrasPorTipo).forEach(tipo => {
         html += `
             <div class="mb-4">
-                <h6 class="fw-bold border-bottom pb-2">${tipo}</h6>
+                <h6 class="modal-extra-title">${tipo}</h6>
                 <div class="row">
         `;
 
@@ -938,18 +1397,16 @@ function renderExtrasEnModal(productoId) {
             let cantidad = cantidadesExtras[extra.id] || 0;
 
             html += `
-                <div class="col-md-6 mb-3">
-                    <div class="border rounded p-2 h-100">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>${extra.nombre}</strong><br>
-                                <small class="text-muted">$ ${formatearPeso(extra.precio)}</small>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="cambiarCantidadExtra(${extra.id}, -1)">-</button>
-                                <span id="modal_cantidad_extra_${extra.id}">${cantidad}</span>
-                                <button type="button" class="btn btn-sm btn-outline-success" onclick="cambiarCantidadExtra(${extra.id}, 1)">+</button>
-                            </div>
+                <div class="col-md-6 col-12">
+                    <div class="extra-item h-100">
+                        <div>
+                            <strong>${extra.nombre}</strong><br>
+                            <small class="text-muted">$ ${formatearPeso(extra.precio)}</small>
+                        </div>
+                        <div class="qty-controls">
+                            <button type="button" class="qty-btn minus" onclick="cambiarCantidadExtra(${extra.id}, -1)">-</button>
+                            <span class="qty-value" id="modal_cantidad_extra_${extra.id}">${cantidad}</span>
+                            <button type="button" class="qty-btn plus" onclick="cambiarCantidadExtra(${extra.id}, 1)">+</button>
                         </div>
                     </div>
                 </div>
@@ -987,15 +1444,13 @@ function renderSaboresEnModal(productoId) {
         let cantidad = cantidadesSabores[sabor.id] || 0;
 
         html += `
-            <div class="col-md-6 mb-3">
-                <div class="border rounded p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <strong>${sabor.nombre}</strong>
-                        <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="cambiarCantidadSabor(${sabor.id}, -1)">-</button>
-                            <span id="cantidad_sabor_${sabor.id}">${cantidad}</span>
-                            <button type="button" class="btn btn-sm btn-outline-success" onclick="cambiarCantidadSabor(${sabor.id}, 1)">+</button>
-                        </div>
+            <div class="col-md-6 col-12">
+                <div class="extra-item h-100">
+                    <strong>${sabor.nombre}</strong>
+                    <div class="qty-controls">
+                        <button type="button" class="qty-btn minus" onclick="cambiarCantidadSabor(${sabor.id}, -1)">-</button>
+                        <span class="qty-value" id="cantidad_sabor_${sabor.id}">${cantidad}</span>
+                        <button type="button" class="qty-btn plus" onclick="cambiarCantidadSabor(${sabor.id}, 1)">+</button>
                     </div>
                 </div>
             </div>
@@ -1156,10 +1611,12 @@ function calcularTotalPagado() {
 function marcarPagoActivo(boton) {
     document.querySelectorAll('.btn-pago-rapido').forEach(btn => {
         btn.classList.remove('active-pay');
+        btn.setAttribute('aria-pressed', 'false');
     });
 
     if (boton) {
         boton.classList.add('active-pay');
+        boton.setAttribute('aria-pressed', 'true');
     }
 }
 
@@ -1497,6 +1954,13 @@ function agregarProductoConExtras(id, nombre, precio) {
     total += precioUnitarioLinea;
     renderCarrito();
     limpiarExtrasSeleccionados();
+
+    // Auto-seleccionar efectivo al agregar el primer producto
+    if (carrito.length === 1 && !pagoAutoSeleccionado) {
+        pagoAutoSeleccionado = true;
+        const btnEfectivo = document.querySelector('button.btn-pago-rapido');
+        if (btnEfectivo) seleccionarPagoSimple('efectivo', btnEfectivo);
+    }
 }
 
 function disminuirCantidad(index) {
@@ -1531,6 +1995,7 @@ function eliminar(index) {
 function vaciarCarrito() {
     carrito = [];
     total = 0;
+    pagoAutoSeleccionado = false;
 
     document.getElementById("pago_efectivo").value = 0;
     document.getElementById("pago_nequi").value = 0;
