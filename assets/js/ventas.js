@@ -517,13 +517,7 @@ function mostrarCambioEfectivo(mostrar) {
     contenedor.classList.toggle('d-none', !mostrar);
 }
 
-function actualizarBotonEfectivo() {
-    const pagos = obtenerPagos();
-    const faltante = total - (pagos.nequi + pagos.daviplata + pagos.transferencia);
-    const btn = document.getElementById('btnCompletarEfectivo');
-    if (!btn) return;
-    btn.textContent = faltante > 0 ? `Faltan $${faltante.toLocaleString()}` : 'Pago completo';
-}
+
 
 function seleccionarPagoSimple(metodo, boton) {
     marcarPagoActivo(boton);
@@ -551,16 +545,7 @@ function activarPagoMixto(boton) {
     actualizarResumenPagos();
 }
 
-function completarConEfectivo() {
-    const pagos = obtenerPagos();
-    const faltante = total - (pagos.nequi + pagos.daviplata + pagos.transferencia);
-    if (faltante <= 0) return;
 
-    document.getElementById('pago_efectivo').value = faltante;
-    document.getElementById('efectivo_recibido').value = faltante;
-
-    actualizarResumenPagos();
-}
 
 function obtenerEfectivoRecibido() {
     return parseFloat(document.getElementById('efectivo_recibido')?.value) || 0;
@@ -586,7 +571,6 @@ function actualizarResumenPagos() {
     if (mostrarVueltasEl) mostrarVueltasEl.textContent = `$ ${vueltas.toLocaleString('es-CO')}`;
 
     validarPagoParaGuardar();
-    actualizarBotonEfectivo();
 }
 
 function validarPagoParaGuardar() {

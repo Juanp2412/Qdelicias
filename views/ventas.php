@@ -440,15 +440,6 @@ while ($e = $extras->fetch_assoc()) {
                         value="0"
                         placeholder="Ej: 60000"
                     >
-                    <button
-                        type="button"
-                        id="btnCompletarEfectivo"
-                        class="btn btn-sm btn-success w-100 mt-2"
-                        onclick="completarConEfectivo()"
-                    >
-                        Completar con efectivo
-                    </button>
-
                     <div class="vueltas-box mt-2">
                         <span>Vueltas a entregar</span>
                         <strong id="mostrarVueltas">$ 0</strong>
