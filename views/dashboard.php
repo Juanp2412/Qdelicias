@@ -13,8 +13,14 @@ if ($rol != 'admin') {
 }
 
 $filtro = $_GET['filtro'] ?? 'hoy';
+$fechaInicio = $_GET['fecha_inicio'] ?? '';
+$fechaFin = $_GET['fecha_fin'] ?? '';
 
-if (!in_array($filtro, ['hoy', 'semana', 'mes', 'año'])) {
+if (!in_array($filtro, ['hoy', 'semana', 'mes', 'año', 'personalizado'])) {
+    $filtro = 'hoy';
+}
+
+if ($filtro == 'personalizado' && (empty($fechaInicio) || empty($fechaFin))) {
     $filtro = 'hoy';
 }
 
@@ -44,6 +50,18 @@ if ($filtro == "año") {
     $tituloPeriodo = "Este año";
     $selectGrafica = "MONTH(fecha) AS grupo, MONTHNAME(fecha) AS etiqueta";
     $groupGrafica = "MONTH(fecha)";
+}
+if ($filtro == "personalizado") {
+    $where = "DATE(fecha) BETWEEN '$fechaInicio' AND '$fechaFin'";
+    $tituloPeriodo = "Del " . date("d/m/Y", strtotime($fechaInicio)) . " al " . date("d/m/Y", strtotime($fechaFin));
+
+    if ($fechaInicio == $fechaFin) {
+        $selectGrafica = "HOUR(fecha) AS grupo, CONCAT(HOUR(fecha), ':00') AS etiqueta";
+        $groupGrafica = "HOUR(fecha)";
+    } else {
+        $selectGrafica = "DATE(fecha) AS grupo, DATE_FORMAT(fecha, '%d/%m') AS etiqueta";
+        $groupGrafica = "DATE(fecha)";
+    }
 }
 
 $whereVentasAlias = str_replace("fecha", "v.fecha", $where);
@@ -196,11 +214,35 @@ $topPago = $topPagoQuery->fetch_assoc();
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Dashboard - <?php echo $tituloPeriodo; ?></h3>
 
-        <div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
             <a href="?filtro=hoy" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='hoy')?'active':''; ?>">Hoy</a>
             <a href="?filtro=semana" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='semana')?'active':''; ?>">Semana</a>
             <a href="?filtro=mes" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='mes')?'active':''; ?>">Mes</a>
             <a href="?filtro=año" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='año')?'active':''; ?>">Año</a>
+
+            <form method="GET" class="d-flex gap-2 align-items-center">
+                <input type="hidden" name="filtro" value="personalizado">
+
+                <input 
+                    type="date" 
+                    name="fecha_inicio" 
+                    class="form-control form-control-sm"
+                    value="<?php echo htmlspecialchars($fechaInicio); ?>"
+                    required
+                >
+
+                <input 
+                    type="date" 
+                    name="fecha_fin" 
+                    class="form-control form-control-sm"
+                    value="<?php echo htmlspecialchars($fechaFin); ?>"
+                    required
+                >
+
+                <button class="btn btn-sm btn-primary">
+                    Aplicar
+                </button>
+            </form>
         </div>
     </div>
 
