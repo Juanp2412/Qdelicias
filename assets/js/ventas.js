@@ -11,6 +11,7 @@ let productoSeleccionado = null;
 let pagoAutoSeleccionado = false;
 let cantidadesSabores = {};
 let cantidadesExtras = {};
+let categoriaActivaId = 0;
 
 // Inicializar contadores de extras
 extrasCatalogo.forEach(extra => {
@@ -19,10 +20,16 @@ extrasCatalogo.forEach(extra => {
 
 /* ─── Categorías ─────────────────────────────────────────── */
 function filtrarCategoria(categoriaId, boton = null) {
+    categoriaActivaId = categoriaId;
+
+    const textoBusqueda = (document.getElementById('buscadorProductos')?.value || '').toLowerCase();
+
     document.querySelectorAll('.producto-item').forEach(producto => {
         const categoriaProducto = parseInt(producto.getAttribute('data-categoria'));
-        producto.style.display =
-            (categoriaId === 0 || categoriaProducto === categoriaId) ? 'block' : 'none';
+        const nombre = (producto.dataset.nombre || '').toLowerCase();
+        const pasaCategoria = (categoriaId === 0 || categoriaProducto === categoriaId);
+        const pasaBusqueda = nombre.includes(textoBusqueda);
+        producto.style.display = (pasaCategoria && pasaBusqueda) ? 'block' : 'none';
     });
 
     document.querySelectorAll('.btn-categoria').forEach(btn => {
@@ -42,7 +49,9 @@ function buscarProductos() {
 
     document.querySelectorAll('.producto-item').forEach(p => {
         const n = (p.dataset.nombre || '').toLowerCase();
-        p.style.display = n.includes(t) ? 'block' : 'none';
+        const categoriaProducto = parseInt(p.getAttribute('data-categoria'));
+        const pasaCategoria = (categoriaActivaId === 0 || categoriaProducto === categoriaActivaId);
+        p.style.display = (n.includes(t) && pasaCategoria) ? 'block' : 'none';
     });
 }
 
