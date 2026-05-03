@@ -536,6 +536,7 @@ function seleccionarPagoSimple(metodo, boton) {
     document.getElementById('pago_' + metodo).value = total;
     document.getElementById('efectivo_recibido').value = (metodo === 'efectivo') ? total : 0;
 
+    mostrarCambioEfectivo(metodo === 'efectivo');
     actualizarResumenPagos();
 }
 
