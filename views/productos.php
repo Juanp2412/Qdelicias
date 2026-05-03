@@ -25,60 +25,94 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
 
 <body class="bg-light">
 
-<div class="container mt-4">
+<div class="container-fluid pt-5 mt-4">
 <?php include 'layout/header.php'; ?>
 
-    <h3>Gestión de Productos</h3>
-
-    <!-- FORMULARIO CREAR -->
-    <div class="card p-3 mb-4">
-        <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="accion" value="crear">
-
-            <div class="row g-2">
-                <div class="col-md-3">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" name="nombre" class="form-control" placeholder="Nombre del producto" required>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Precio</label>
-                    <input type="number" name="precio" class="form-control" placeholder="Precio" required>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Categoría</label>
-                    <select name="categoria_id" class="form-select" required>
-                        <option value="">Seleccione</option>
-                        <?php while ($cat = $categorias->fetch_assoc()) { ?>
-                            <option value="<?php echo $cat['id']; ?>">
-                                <?php echo $cat['nombre']; ?>
-                            </option>
-                        <?php } ?>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Tipo</label>
-                    <select name="tipo_configuracion" class="form-select" required>
-                        <option value="simple">Simple</option>
-                        <option value="extras">Extras</option>
-                        <option value="sabores">Sabores</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Imagen</label>
-                    <input type="file" name="imagen" class="form-control" accept="image/*">
-                </div>
-
-                <div class="col-md-2 mt-3">
-                    <button class="btn btn-success w-100">Guardar</button>
-                </div>
-            </div>
-        </form>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="mb-0">Productos</h3>
+        <small class="text-muted">Administra el catálogo del negocio</small>
     </div>
-    <div class="card p-3 mb-3">
+
+    <button 
+        class="btn btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#modalCrearProducto"
+    >
+        + Nuevo producto
+    </button>
+</div>
+
+
+   <!-- MODAL CREAR PRODUCTO -->
+<div class="modal fade" id="modalCrearProducto" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="accion" value="crear">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Alas familiares" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Precio</label>
+                            <input type="number" name="precio" class="form-control" placeholder="Ej: 58000" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Categoría</label>
+                            <select name="categoria_id" class="form-select" required>
+                                <option value="">Seleccione una categoría</option>
+                                <?php
+                                $categoriasCrear = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+                                while ($catCrear = $categoriasCrear->fetch_assoc()) {
+                                ?>
+                                    <option value="<?php echo $catCrear['id']; ?>">
+                                        <?php echo $catCrear['nombre']; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de producto</label>
+                            <select name="tipo_configuracion" class="form-select" required>
+                                <option value="simple">Simple</option>
+                                <option value="extras">Con extras</option>
+                                <option value="sabores">Con sabores</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Imagen</label>
+                            <input type="file" name="imagen" class="form-control" accept="image/*">
+                            <small class="text-muted">Recomendado: imagen cuadrada o rectangular horizontal.</small>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar producto</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+    <div class="card border-0 shadow-sm p-3 mb-3">
     <div class="row g-2">
         <div class="col-md-5">
             <input 
@@ -116,7 +150,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
     
 
     <!-- TABLA -->
-    <table class="table table-bordered align-middle">
+    <table class="table table-hover table-bordered align-middle bg-white shadow-sm">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
