@@ -687,6 +687,16 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
                 <h5 class="modal-title fw-bold">Confirmar cobro</h5>
                 <button
                     type="button"
+                    class="btn btn-sm btn-outline-secondary btn-min-pago"
+                    id="btnMinimizarPagoCheckout"
+                    aria-pressed="false"
+                    title="Minimizar cobro"
+                    onclick="toggleMinimizarPagoCheckout()"
+                >
+                    -
+                </button>
+                <button
+                    type="button"
                     class="btn-close"
                     aria-label="Close"
                     onclick="cerrarCheckout()"

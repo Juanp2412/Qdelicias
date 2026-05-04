@@ -722,24 +722,37 @@ body {
 }
 
 .modal-checkout-left .modal-dialog {
-  max-width: min(860px, 62vw);
-  width: min(860px, 62vw);
+  max-width: none;
+  width: var(--checkout-left-w, clamp(560px, 56vw, 860px));
   margin: 0 !important;
   position: fixed;
   top: 16px;
-  left: calc(50% + 8px);
-  transform: translateX(-100%) !important;
+  left: calc(50% - (var(--checkout-pair-w) / 2));
+  transform: none !important;
 }
 
 .modal-checkout-right .modal-dialog {
-  max-width: min(460px, 34vw);
-  width: min(460px, 34vw);
+  max-width: none;
+  width: var(--checkout-right-w, clamp(340px, 31vw, 460px));
   margin: 0 !important;
   position: fixed;
   top: 16px;
-  left: calc(50% + 32px);
+  left: calc(
+    50% - (var(--checkout-pair-w) / 2) + var(--checkout-left-w) +
+      var(--checkout-gap)
+  );
   transform: none !important;
   min-height: calc(100vh - 32px);
+}
+
+.modal-checkout-left,
+.modal-checkout-right {
+  --checkout-left-w: clamp(560px, 56vw, 860px);
+  --checkout-right-w: clamp(340px, 31vw, 460px);
+  --checkout-gap: clamp(10px, 1vw, 20px);
+  --checkout-pair-w: calc(
+    var(--checkout-left-w) + var(--checkout-right-w) + var(--checkout-gap)
+  );
 }
 
 .modal-checkout-left.show .modal-dialog,
@@ -765,8 +778,25 @@ body {
 }
 
 .modal-pago-side-dialog .modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: #fff;
   border-bottom: 1px solid #e8edf3;
+}
+
+.modal-pago-side-dialog .modal-title {
+  margin-right: auto;
+}
+
+.btn-min-pago {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .modal-pago-side-dialog .modal-body {
@@ -798,16 +828,98 @@ body {
   font-size: 16px;
 }
 
-@media (max-width: 1200px) {
-  .modal-checkout-left .modal-dialog,
+@media (max-width: 1180px) {
+  .modal-checkout-left,
+  .modal-checkout-right {
+    --checkout-left-w: clamp(500px, 58vw, 660px);
+    --checkout-right-w: clamp(310px, 34vw, 390px);
+    --checkout-gap: clamp(8px, 0.8vw, 14px);
+  }
+}
+
+@media (max-width: 1080px) {
+  .modal-checkout-left,
+  .modal-checkout-right {
+    --checkout-right-w: clamp(280px, 34vw, 340px);
+    --checkout-gap: clamp(6px, 0.8vw, 10px);
+    --checkout-left-w: clamp(
+      420px,
+      calc(100vw - var(--checkout-right-w) - var(--checkout-gap) - 32px),
+      620px
+    );
+  }
+}
+
+@media (max-width: 980px) {
+  .btn-min-pago {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-checkout-left .modal-dialog {
+    width: min(96vw, 760px);
+    left: 50%;
+    transform: translateX(-50%) !important;
+  }
+
   .modal-checkout-right .modal-dialog {
-    max-width: 96vw;
-    width: 96vw;
-    margin: 16px auto;
-    position: relative;
-    top: auto;
+    width: min(420px, calc(100vw - 28px));
     left: auto;
-    transform: none !important;
+    right: 14px;
+    top: auto;
+    bottom: 14px;
+    min-height: 0;
+    height: min(62vh, 520px);
+  }
+
+  .modal-pago-side-dialog .modal-content {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .modal-checkout-right.is-minimized .modal-dialog {
+    width: min(300px, calc(100vw - 24px));
+    height: 58px;
+    min-height: 58px;
+    right: 12px;
+    bottom: 12px;
+    top: auto;
+  }
+
+  .modal-checkout-right.is-minimized .modal-content {
+    min-height: 58px;
+    height: 58px;
+    overflow: hidden;
+  }
+
+  .modal-checkout-right.is-minimized .modal-body,
+  .modal-checkout-right.is-minimized .modal-footer {
+    display: none;
+  }
+
+  .modal-checkout-right.is-minimized .modal-header {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 700px) {
+  .modal-checkout-left .modal-dialog {
+    width: calc(100vw - 14px);
+    top: 8px;
+  }
+
+  .modal-checkout-right .modal-dialog {
+    width: calc(100vw - 14px);
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%) !important;
+    bottom: 8px;
+    height: 44vh;
+  }
+
+  .modal-pago-side-dialog .modal-body {
+    padding: 10px;
   }
 }
 
