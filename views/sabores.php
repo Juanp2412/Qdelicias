@@ -36,7 +36,7 @@ $sabores = $conn->query("SELECT * FROM sabores ORDER BY id DESC");
 <?php include 'layout/header.php'; ?>
 <?php include 'layout/sidebar.php'; ?>
 
-<div style="margin-left:250px; padding:86px 20px 20px 20px;">
+<div class="main-content">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>

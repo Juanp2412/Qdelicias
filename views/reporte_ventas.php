@@ -95,8 +95,9 @@ if (!empty($fecha_inicio) && !empty($fecha_fin)) {
 <body class="bg-light">
 
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
 
-<div class="container mt-4">
+<div class="main-content">
     <div class="card p-4 mb-4">
         <h3 class="mb-3">Reporte de ventas por fechas</h3>
 

@@ -1,67 +1,41 @@
 <?php
 $rol = $_SESSION['rol'] ?? 'vendedor';
+$paginaActual = basename($_SERVER['PHP_SELF']);
+
+function activo($pagina, $paginaActual) {
+    return $pagina === $paginaActual ? 'active' : '';
+}
 ?>
 
-<div style="width:250px; position:fixed; top:56px; left:0; height:calc(100vh - 56px); background:#212529; color:white; overflow-y:auto;">
+<div class="sidebar">
 
-    <ul class="nav flex-column px-2 pt-3">
+    <div class="sidebar-logo">
+        🚀 SmartPOS
+    </div>
 
-        <li class="nav-item mb-2">
-            <a href="dashboard.php" class="nav-link text-white">📊 Dashboard</a>
-        </li>
+    <div class="section">General</div>
 
-        <li class="nav-item mb-2">
-            <a href="ventas.php" class="nav-link text-white">💰 Ventas</a>
-        </li>
+    <a href="/Qdelicias/views/dashboard.php" class="<?php echo activo('dashboard.php', $paginaActual); ?>">📊 Dashboard</a>
+    <a href="/Qdelicias/views/ventas.php" class="<?php echo activo('ventas.php', $paginaActual); ?>">💰 Ventas</a>
+    <a href="/Qdelicias/views/reporte_ventas.php" class="<?php echo activo('reporte_ventas.php', $paginaActual); ?>">📈 Reportes</a>
 
-        <li class="nav-item mb-2">
-            <a href="reporte_ventas.php" class="nav-link text-white">📈 Reportes</a>
-        </li>
+    <?php if ($rol == 'admin') { ?>
 
-        <?php if ($rol == 'admin') { ?>
+        <div class="section">Administración</div>
 
-            <hr class="border-secondary">
+        <a href="/Qdelicias/views/productos.php" class="<?php echo activo('productos.php', $paginaActual); ?>">📦 Productos</a>
+        <a href="/Qdelicias/views/categorias.php" class="<?php echo activo('categorias.php', $paginaActual); ?>">📁 Categorías</a>
+        <a href="/Qdelicias/views/extras.php" class="<?php echo activo('extras.php', $paginaActual); ?>">➕ Extras</a>
+        <a href="/Qdelicias/views/tipos_extra.php" class="<?php echo activo('tipos_extra.php', $paginaActual); ?>">🧩 Tipos extra</a>
+        <a href="/Qdelicias/views/reglas_producto.php" class="<?php echo activo('reglas_producto.php', $paginaActual); ?>">⚙️ Reglas</a>
+        <a href="/Qdelicias/views/sabores.php" class="<?php echo activo('sabores.php', $paginaActual); ?>">🍓 Sabores</a>
+        <a href="/Qdelicias/views/producto_sabores.php" class="<?php echo activo('producto_sabores.php', $paginaActual); ?>">🔗 Asignar sabores</a>
+        <a href="/Qdelicias/views/usuarios.php" class="<?php echo activo('usuarios.php', $paginaActual); ?>">👤 Usuarios</a>
 
-            <li class="nav-item mb-2">
-                <a href="productos.php" class="nav-link text-white">📦 Productos</a>
-            </li>
+    <?php } ?>
 
-            <li class="nav-item mb-2">
-                <a href="categorias.php" class="nav-link text-white">📁 Categorías</a>
-            </li>
+    <div class="section">Cuenta</div>
 
-            <li class="nav-item mb-2">
-                <a href="extras.php" class="nav-link text-white">➕ Extras</a>
-            </li>
-
-            <li class="nav-item mb-2">
-                <a href="tipos_extra.php" class="nav-link text-white">🧩 Tipos extra</a>
-            </li>
-
-            <li class="nav-item mb-2">
-                <a href="reglas_producto.php" class="nav-link text-white">⚙️ Reglas</a>
-            </li>
-
-            <li class="nav-item mb-2">
-                <a href="sabores.php" class="nav-link text-white">🍓 Sabores</a>
-            </li>
-
-            <li class="nav-item mb-2">
-                <a href="producto_sabores.php" class="nav-link text-white">🔗 Asignar sabores</a>
-            </li>
-
-            <li class="nav-item mb-2">
-                <a href="usuarios.php" class="nav-link text-white">👤 Usuarios</a>
-            </li>
-
-        <?php } ?>
-
-        <hr class="border-secondary">
-
-        <li class="nav-item">
-            <a href="../controllers/logoutController.php" class="nav-link text-danger">🚪 Cerrar sesión</a>
-        </li>
-
-    </ul>
+    <a href="/Qdelicias/controllers/logout.php" class="logout">🚪 Cerrar sesión</a>
 
 </div>

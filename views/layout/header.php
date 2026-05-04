@@ -8,16 +8,25 @@ $nombre = $_SESSION['nombre'] ?? $_SESSION['usuario'];
 $rol = $_SESSION['rol'] ?? 'vendedor';
 ?>
 
-<nav class="navbar navbar-expand navbar-dark bg-dark fixed-top px-3" style="height:56px;">
-    <a class="navbar-brand me-4" href="dashboard.php">QDelicias POS</a>
+<link rel="stylesheet" href="/Qdelicias/assets/css/app.css">
 
-    <div class="ms-auto d-flex align-items-center gap-2">
-        <span class="text-white small me-2">
-            <?php echo htmlspecialchars($nombre); ?> | <?php echo htmlspecialchars($rol); ?>
-        </span>
+<div class="topbar">
 
-        <a href="dashboard.php" class="btn btn-light btn-sm">Dashboard</a>
-        <a href="ventas.php" class="btn btn-success btn-sm">Ventas</a>
-        <a href="../controllers/logoutController.php" class="btn btn-danger btn-sm">Cerrar sesión</a>
+    <div class="brand">
+        SmartPOS
     </div>
-</nav>
+
+    <div class="d-flex align-items-center gap-3">
+
+        <div class="user-box">
+            <div class="name"><?php echo htmlspecialchars($nombre); ?></div>
+            <div class="role"><?php echo htmlspecialchars($rol); ?></div>
+        </div>
+
+        <a href="/Qdelicias/views/dashboard.php" class="btn-custom btn-dashboard">Dashboard</a>
+        <a href="/Qdelicias/views/ventas.php" class="btn-custom btn-ventas">Ventas</a>
+        <a href="/Qdelicias/controllers/logout.php" class="btn-custom btn-logout">Salir</a>
+
+    </div>
+
+</div>

@@ -63,7 +63,7 @@ if ($producto_id != '') {
 <?php include 'layout/header.php'; ?>
 <?php include 'layout/sidebar.php'; ?>
 
-<div style="margin-left:250px; padding:86px 20px 20px 20px;">
+<div class="main-content">
 
     <div class="mb-3">
         <h3 class="mb-0">Asignar sabores</h3>
