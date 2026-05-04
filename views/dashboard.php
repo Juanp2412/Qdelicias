@@ -85,11 +85,23 @@ $cantidadVentas = $cantidadVentasQuery->fetch_assoc()['cantidad'] ?? 0;
 
 $ticketPromedio = ($cantidadVentas > 0) ? ($totalPeriodo / $cantidadVentas) : 0;
 
+
+// Ajustar el GROUP BY para incluir todas las expresiones no agregadas
+if ($filtro == "hoy" || ($filtro == "personalizado" && $fechaInicio == $fechaFin)) {
+    $groupBy = "HOUR(fecha), CONCAT(HOUR(fecha), ':00')";
+} elseif ($filtro == "mes" || $filtro == "semana" || ($filtro == "personalizado" && $fechaInicio != $fechaFin)) {
+    $groupBy = "DATE(fecha), DATE_FORMAT(fecha, '%d/%m')";
+} elseif ($filtro == "año") {
+    $groupBy = "MONTH(fecha), MONTHNAME(fecha)";
+} else {
+    $groupBy = $groupGrafica; // fallback
+}
+
 $graficaVentasQuery = $conn->query("
     SELECT $selectGrafica, SUM(total) AS total
     FROM ventas
     WHERE $where
-    GROUP BY $groupGrafica
+    GROUP BY $groupBy
     ORDER BY grupo ASC
 ");
 

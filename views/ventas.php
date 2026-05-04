@@ -46,7 +46,26 @@ $categorias = $conn->query("
     WHERE estado = 1
     ORDER BY nombre ASC
 ");
+$categoriasData = [];
+$categoriasNombrePorId = [];
+$categoriaChipTemas = [];
+$temasChip = [
+    ['bg' => '#eef9ee', 'color' => '#4f8b51', 'border' => '#d7edd8'],
+    ['bg' => '#eaf4ff', 'color' => '#3b6ea8', 'border' => '#d2e6ff'],
+    ['bg' => '#fff2ea', 'color' => '#c05c2d', 'border' => '#ffd8c2'],
+    ['bg' => '#f4edff', 'color' => '#6e54a9', 'border' => '#e1d4ff'],
+    ['bg' => '#fff8e8', 'color' => '#9d7b2c', 'border' => '#ffe6b5']
+];
 $saboresPorProducto = [];
+
+while ($cat = $categorias->fetch_assoc()) {
+    $catId = (int)$cat['id'];
+    $temIndex = $catId % count($temasChip);
+
+    $categoriasData[] = $cat;
+    $categoriasNombrePorId[$catId] = $cat['nombre'];
+    $categoriaChipTemas[$catId] = $temasChip[$temIndex];
+}
 
 $sqlSabores = "SELECT ps.producto_id, s.id, s.nombre
                FROM producto_sabores ps
@@ -96,385 +115,13 @@ while ($e = $extras->fetch_assoc()) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ventas - QDelicias POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<style>
-:root {
-    --dark:#17191d;
-    --purple:#7c3aed;
-    --pink:#ec4899;
-    --green:#15803d;
-    --bg:#f6f2fb;
-    --border:#e5e7eb;
-    --muted:#6b7280
-}
-
-body {
-    background:radial-gradient(circle at top left,#fff7ed 0,#f7f2ff 35%,#f8fafc 80%);
-    font-size:14px
-}
-
-.pos-shell {
-    padding:14px
-}
-
-.top-bar {
-    background:linear-gradient(135deg,#111827,#20242b);
-    color:white;
-    padding:14px 16px;
-    border-radius:16px;
-    margin-bottom:14px;
-    box-shadow:0 10px 28px rgba(17,24,39,.18)
-}
-
-.brand-title {
-    font-size:22px;
-    font-weight:900
-}
-
-.brand-subtitle {
-    color:#d1d5db;
-    font-size:12px
-}
-
-.layout-grid {
-    display:grid;
-    grid-template-columns:210px minmax(430px,1fr) 550px;
-    gap:14px;
-    align-items:start
-}
-
-.panel-card {
-    background:rgba(255,255,255,.95);
-    border:1px solid var(--border);
-    border-radius:18px;
-    box-shadow:0 12px 30px rgba(15,23,42,.08)
-}
-
-.side-panel {
-    padding:14px;
-    position:sticky;
-    top:14px;
-    min-height:calc(100vh - 110px)
-}
-
-.products-panel {
-    padding:14px;
-    min-height:calc(100vh - 110px)
-}
-
-.cart-panel {
-    padding:12px;
-    position:sticky;
-    top:14px;
-    max-height:calc(100vh - 28px);
-    overflow:auto
-}
-
-.section-title {
-    font-size:18px;
-    font-weight:900;
-    margin:0;
-    color:#111827
-}
-
-.section-help {
-    color:var(--muted);
-    font-size:12px
-}
-
-.btn-categoria {
-    width:100%;
-    border-radius:12px;
-    padding:10px 11px;
-    margin-bottom:8px;
-    font-weight:700;
-    text-align:left;
-    display:flex;
-    align-items:center;
-    justify-content:space-between
-}
-
-.btn-categoria.btn-dark {
-    background:#111827;
-    border-color:#111827
-}
-
-.toolbar {
-    display:flex;
-    gap:10px;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:14px
-}
-
-.search-box {
-    max-width:360px;
-    border-radius:12px;
-    padding:10px 13px
-}
-
-.productos-grid {
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:12px
-}
-
-.producto-btn {
-    width:100%;
-    min-height:150px;
-    border-radius:18px;
-    border:1px solid #dbeafe;
-    background:#fff;
-    padding:0;
-    text-align:left;
-    overflow:hidden;
-    box-shadow:0 8px 18px rgba(37,99,235,.08);
-    transition:.12s
-}
-
-.producto-btn:hover {
-    transform:translateY(-2px);
-    box-shadow:0 14px 26px rgba(124,58,237,.16);
-    border-color:var(--purple)
-}
-
-.producto-img {
-    height:82px;
-    background:linear-gradient(135deg,#fde68a,#f0abfc,#c4b5fd);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    font-size:34px;
-    font-weight:900
-}
-
-.producto-img img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block
-}
-
-.producto-body {
-    padding:11px 12px 12px
-}
-
-.producto-nombre {
-    font-size:14px;
-    font-weight:850;
-    color:#111827;
-    line-height:1.2;
-    min-height:34px
-}
-
-.precio-text {
-    display:block;
-    color:var(--purple);
-    font-size:15px;
-    font-weight:900;
-    margin-top:6px
-}
-
-.tipo-chip {
-    font-size:10px;
-    padding:3px 7px;
-    border-radius:999px;
-    background:#f3e8ff;
-    color:#6d28d9;
-    font-weight:800
-}
-
-.table {
-    font-size:12px;
-    margin-bottom:10px
-}
-
-.table thead th {
-    background:#15191f!important;
-    color:#fff;
-    border-color:#15191f!important
-}
-
-.detalle-extra {
-    font-size:11px;
-    color:#6b7280;
-    display:block;
-    margin-top:4px;
-    line-height:1.3
-}
-
-.total-box {
-    background:linear-gradient(135deg,#16a34a,#15803d);
-    color:white;
-    border-radius:18px;
-    padding:18px;
-    text-align:center;
-    font-size:28px;
-    font-weight:900;
-    box-shadow:0 12px 24px rgba(22,163,74,.20)
-}
-
-.payment-card,.payment-summary {
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:12px;
-    background:#fff
-}
-
-.payment-summary {
-    background:#f8fafc;
-    font-size:13px
-}
-
-.quick-pay-grid {
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:6px
-}
-
-.quick-pay-grid .btn,.acciones-finales .btn {
-    border-radius:12px;
-    padding:7px 6px;
-    font-weight:900;
-    font-size:12px;
-    min-height:36px
-}
-
-
-
-.quick-pay-grid .btn.active-pay {
-    background:#111827!important;
-    color:#fff!important;
-    border-color:#111827!important
-}
-
-.payment-inputs {
-    display:none;
-    margin-top:9px
-}
-
-.payment-inputs.show {
-    display:block
-}
-
-.payment-inputs .form-label {
-    font-size:11px;
-    margin-bottom:3px
-}
-.cambio-efectivo-box {
-    border: 1px solid #bbf7d0;
-    border-radius: 15px;
-    padding: 10px;
-    background: #f0fdf4;
-}
-
-.vueltas-box {
-    background: #d1fae5;
-    border: 1px solid #86efac;
-    border-radius: 14px;
-    padding: 11px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.vueltas-box span {
-    color: #166534;
-    font-weight: 800;
-    font-size: 12px;
-}
-
-.vueltas-box strong {
-    color: #14532d;
-    font-size: 22px;
-    font-weight: 900;
-}
-
-.form-control {
-    border-radius:12px
-}
-
-.acciones-finales {
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap
-}
-
-.modal-content {
-    border-radius:20px;
-    border:0;
-    overflow:hidden
-}
-
-.modal-product-header {
-    background:linear-gradient(135deg,#faf5ff,#fff7ed);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:14px
-}
-
-.extra-item {
-    border:1px solid #dee2e6;
-    border-radius:12px;
-    padding:10px;
-    margin-bottom:10px;
-    background:#fff
-}
-
-.extra-cantidad {
-    min-width:32px;
-    text-align:center;
-    font-weight:bold
-}
-
-@media(max-width:1200px) {
-    .layout-grid {
-        grid-template-columns:190px 1fr
-    }
-
-    .cart-panel {
-        grid-column:1/-1;
-        position:relative;
-        max-height:none
-    }
-
-}
-
-@media(max-width:768px) {
-    .layout-grid {
-        display:block
-    }
-
-    .side-panel,.products-panel,.cart-panel {
-        position:relative;
-        min-height:auto;
-        max-height:none;
-        margin-bottom:12px
-    }
-
-    .productos-grid {
-        grid-template-columns:repeat(2,minmax(0,1fr))
-    }
-
-    .toolbar {
-        align-items:stretch;
-        flex-direction:column
-    }
-
-    .search-box {
-        max-width:100%
-    }
-
-    .quick-pay-grid {
-        grid-template-columns:1fr
-    }
-
-}
-</style>
+<link rel="stylesheet" href="../assets/css/ventas.css">
 </head>
 <body>
-
 <div class="container-fluid pos-shell">
 
     <div class="top-bar d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -513,18 +160,17 @@ body {
 
             <h5 class="section-title">Categorías</h5>
 
-            <div class="section-help mb-3">
-                Filtra rápido la venta
-            </div>
+            <div class="mb-2"></div>
 
             <button class="btn btn-dark btn-categoria" onclick="filtrarCategoria(0, this)">
                 <span>Todas</span>
                 <span>›</span>
             </button>
 
-            <?php while ($cat = $categorias->fetch_assoc()) { ?>
+            <?php foreach ($categoriasData as $cat) { ?>
 
                 <button
+                    type="button"
                     class="btn btn-outline-primary btn-categoria"
                     onclick="filtrarCategoria(<?php echo (int)$cat['id']; ?>, this)"
                 >
@@ -552,7 +198,7 @@ body {
                     type="text"
                     id="buscadorProductos"
                     class="form-control search-box"
-                    placeholder="Buscar producto..."
+                    placeholder="Buscar en productos..."
                     oninput="buscarProductos()"
                 >
 
@@ -565,7 +211,10 @@ body {
 
                 while ($p = $productos->fetch_assoc()) {
                     $imagenProducto = isset($p['imagen']) ? trim($p['imagen']) : '';
-                    $inicial = mb_substr($p['nombre'], 0, 1, 'UTF-8');
+                    $inicial = substr($p['nombre'], 0, 1);
+                    $categoriaId = (int)$p['categoria_id'];
+                    $categoriaNombre = $categoriasNombrePorId[$categoriaId] ?? 'Sin categoria';
+                    $categoriaTema = $categoriaChipTemas[$categoriaId] ?? ['bg' => '#f3f4f6', 'color' => '#4b5563', 'border' => '#d1d5db'];
                 ?>
 
                     <div
@@ -575,6 +224,7 @@ body {
                     >
 
                         <button
+                            type="button"
                             class="producto-btn"
                             onclick="abrirModalProducto(
                                 <?php echo (int)$p['id']; ?>,
@@ -602,21 +252,24 @@ body {
 
                             <div class="producto-body">
 
-                                <div class="d-flex justify-content-between gap-2 align-items-start">
+                                <div class="producto-nombre">
+                                    <?php echo htmlspecialchars($p['nombre']); ?>
+                                </div>
 
-                                    <div class="producto-nombre">
-                                        <?php echo htmlspecialchars($p['nombre']); ?>
-                                    </div>
+                                <div class="producto-meta">
 
-                                    <span class="tipo-chip">
-                                        <?php echo htmlspecialchars($p['tipo_configuracion']); ?>
+                                    <span
+                                        class="tipo-chip"
+                                        style="background:<?php echo htmlspecialchars($categoriaTema['bg']); ?>;color:<?php echo htmlspecialchars($categoriaTema['color']); ?>;border:1px solid <?php echo htmlspecialchars($categoriaTema['border']); ?>"
+                                    >
+                                        <?php echo htmlspecialchars($categoriaNombre); ?>
+                                    </span>
+
+                                    <span class="producto-precio" aria-label="Precio $ <?php echo number_format($p['precio'], 0, ',', '.'); ?>">
+                                        <span class="precio-text">$ <?php echo number_format($p['precio'], 0, ',', '.'); ?></span>
                                     </span>
 
                                 </div>
-
-                                <span class="precio-text">
-                                    $ <?php echo number_format($p['precio'], 0, ',', '.'); ?>
-                                </span>
 
                             </div>
 
@@ -642,15 +295,23 @@ body {
                     </div>
                 </div>
 
-                <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">
-                    Vaciar
-                </button>
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        onclick="abrirConfirmacionVenta()"
+                    >
+                        Abrir carrito grande
+                    </button>
+                </div>
 
             </div>
 
             <div class="table-responsive">
 
                 <table class="table table-bordered align-middle" id="tabla">
+
+                    <caption class="visually-hidden">Resumen de productos del carrito actual</caption>
 
                     <thead>
                         <tr>
@@ -667,59 +328,96 @@ body {
 
             </div>
 
+            <div class="cart-footer-sticky">
+
             <div class="total-box mb-2">
                 Total: $ <span id="total">0</span>
             </div>
 
+            <div id="paymentDock">
+
             <div class="payment-card mb-2">
 
-                <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="payment-card-head d-flex justify-content-between align-items-center mb-1">
                     <label class="form-label fw-bold mb-0">Pagos</label>
-                    <span class="section-help">Rápido o mixto</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-help">Rápido o mixto</span>
+                        <button
+                            type="button"
+                            id="btnTogglePagoPanel"
+                            class="btn btn-outline-secondary btn-sm payment-toggle-btn"
+                            onclick="togglePagoPanel()"
+                        >
+                            Ver pagos
+                        </button>
+                    </div>
                 </div>
 
-                <div class="quick-pay-grid mb-2">
+                <div id="paymentMiniSummary" class="payment-mini-summary mb-2">
+                    <div class="payment-mini-item">
+                        <span>Pagado</span>
+                        <strong id="mostrarTotalPagadoMini">$ 0</strong>
+                    </div>
+                    <div class="payment-mini-item">
+                        <span>Diferencia</span>
+                        <strong id="mostrarDiferenciaMini">$ 0</strong>
+                    </div>
+                </div>
 
+                <div id="paymentPanelBody" class="payment-panel-body d-none">
+
+                <div class="quick-pay-grid-top mb-2">
                     <button
                         type="button"
-                        class="btn btn-outline-success btn-pago-rapido"
+                        class="btn btn-outline-success btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('efectivo', this)"
                     >
-                        💵 Efectivo
+                        <img src="../assets/img/pagos/efectivo.png" alt="Efectivo" class="pago-imagen">
+                        <span class="pago-nombre">Efectivo</span>
                     </button>
 
                     <button
                         type="button"
-                        class="btn btn-outline-primary btn-pago-rapido"
+                        class="btn btn-outline-primary btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('nequi', this)"
                     >
-                        📱 Nequi
+                        <img src="../assets/img/pagos/nequi.png" alt="Nequi" class="pago-imagen">
+                        <span class="pago-nombre">Nequi</span>
                     </button>
 
                     <button
                         type="button"
-                        class="btn btn-outline-info btn-pago-rapido"
+                        class="btn btn-outline-info btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('daviplata', this)"
                     >
-                        🟣 Daviplata
+                        <img src="../assets/img/pagos/Daviplata.png" alt="Daviplata" class="pago-imagen">
+                        <span class="pago-nombre">Daviplata</span>
                     </button>
+                </div>
 
+                <div class="quick-pay-grid-bottom mb-2">
                     <button
                         type="button"
-                        class="btn btn-outline-secondary btn-pago-rapido"
+                        class="btn btn-outline-secondary btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="seleccionarPagoSimple('transferencia', this)"
                     >
-                        🏦 Transf.
+                        <span class="pago-icon">🏦</span>
+                        <span class="pago-nombre">Transferencia</span>
                     </button>
 
                     <button
                         type="button"
-                        class="btn btn-outline-dark btn-pago-rapido"
+                        class="btn btn-outline-dark btn-pago-rapido btn-pago-metodo"
+                        aria-pressed="false"
                         onclick="activarPagoMixto(this)"
                     >
-                        🔀 Mixto
+                        <span class="pago-icon">➕</span>
+                        <span class="pago-nombre">Mixto</span>
                     </button>
-
                 </div>
 
                 <div class="payment-inputs" id="paymentInputs">
@@ -782,7 +480,7 @@ body {
 
                 </div>
 
-                <div id="boxCambioEfectivo" class="cambio-efectivo-box mt-2">
+                <div id="boxCambioEfectivo" class="cambio-efectivo-box mt-2 d-none">
                     <label class="form-label fw-bold mb-1">
                         ¿Con cuánto paga el cliente?
                     </label>
@@ -796,15 +494,6 @@ body {
                         value="0"
                         placeholder="Ej: 60000"
                     >
-                    <button
-                        type="button"
-                        id="btnCompletarEfectivo"
-                        class="btn btn-sm btn-success w-100 mt-2"
-                        onclick="completarConEfectivo()"
-                    >
-                        Completar con efectivo
-                    </button>
-
                     <div class="vueltas-box mt-2">
                         <span>Vueltas a entregar</span>
                         <strong id="mostrarVueltas">$ 0</strong>
@@ -828,22 +517,25 @@ body {
                     </div>
                 </div>
 
+                </div>
+
+            </div>
+
             </div>
 
             <div class="acciones-finales">
 
                 <button
-                    class="btn btn-success flex-fill"
+                    class="btn btn-success w-100"
                     id="btnGuardarVenta"
-                    onclick="guardarVenta()"
-                    disabled
+                    onclick="abrirConfirmacionVenta()"
                 >
-                    Guardar venta
+                    ✔ Verificar pedido
                 </button>
 
-                <button class="btn btn-secondary flex-fill" onclick="vaciarCarrito()">
-                    Vaciar carrito
-                </button>
+            </div>
+
+            </div>
 
             </div>
 
@@ -855,912 +547,16 @@ body {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-let carrito = [];
-let total = 0;
-let productoSeleccionado = null;
-function filtrarCategoria(categoriaId, boton = null) {
-    const productos = document.querySelectorAll(".producto-item");
-
-    productos.forEach(producto => {
-        const categoriaProducto = parseInt(producto.getAttribute("data-categoria"));
-
-        if (categoriaId === 0 || categoriaProducto === categoriaId) {
-            producto.style.display = "block";
-        } else {
-            producto.style.display = "none";
-        }
-    });
-
-    // Quitar activo de todos
-    document.querySelectorAll(".btn-categoria").forEach(btn => {
-        btn.classList.remove("btn-dark");
-        btn.classList.add("btn-outline-primary");
-    });
-
-    // Activar el actual
-    if (boton) {
-        boton.classList.remove("btn-outline-primary");
-        boton.classList.add("btn-dark");
-    }
-}
-function buscarProductos() {
-    const t = document.getElementById('buscadorProductos').value.toLowerCase();
-
-    document.querySelectorAll('.producto-item').forEach(p => {
-        const n = (p.dataset.nombre || '').toLowerCase();
-        p.style.display = n.includes(t) ? 'block' : 'none';
-    });
-}
-function abrirModalProducto(id, nombre, precio, tipo) {
-    productoSeleccionado = { id, nombre, precio, tipo };
-
-    limpiarExtrasSeleccionados();
-    limpiarSaboresSeleccionados();
-
-    document.getElementById("modalProductoNombre").innerText = nombre;
-    document.getElementById("modalProductoPrecio").innerText = "$ " + formatearPeso(precio);
-    actualizarSubtotalModal();
-
-    if (tipo === 'sabores') {
-        renderSaboresEnModal(id);
-    } else if (tipo === 'extras') {
-        renderExtrasEnModal(id);
-    } else {
-        document.getElementById("modalReglasProducto").innerHTML = "";
-        document.getElementById("modalExtrasContenido").innerHTML =
-            "<p class='text-muted'>Este producto no requiere configuración.</p>";
-    }
-
-    let modal = new bootstrap.Modal(document.getElementById('modalProducto'));
-    modal.show();
-}
-function renderSaboresEnModal(productoId) {
-    const contenedor = document.getElementById("modalExtrasContenido");
-
-    contenedor.innerHTML = `
-        <div class="alert alert-info">
-            Aquí podrás repartir cantidades por sabor (ej: 20 BBQ, 10 Miel Mostaza)
-        </div>
-    `;
-}
-function renderExtrasEnModal(productoId) {
-    const contenedor = document.getElementById("modalExtrasContenido");
-    const reglasBox = document.getElementById("modalReglasProducto");
-
-    let reglas = reglasProductos[productoId] || {};
-
-    let textoReglas = Object.keys(reglas).length
-        ? Object.entries(reglas).map(([tipo, cantidad]) =>
-            `<span class="badge bg-success me-2 mb-2">${tipo}: ${cantidad} incluido(s)</span>`
-        ).join("")
-        : "<span class='text-muted'>Este producto no tiene extras incluidos configurados.</span>";
-
-    reglasBox.innerHTML = textoReglas;
-
-    let extrasPorTipo = {};
-
-    extrasCatalogo.forEach(extra => {
-        if (!extrasPorTipo[extra.tipo]) {
-            extrasPorTipo[extra.tipo] = [];
-        }
-        extrasPorTipo[extra.tipo].push(extra);
-    });
-
-    let html = "";
-
-    Object.keys(extrasPorTipo).forEach(tipo => {
-        html += `
-            <div class="mb-4">
-                <h6 class="fw-bold border-bottom pb-2">${tipo}</h6>
-                <div class="row">
-        `;
-
-        extrasPorTipo[tipo].forEach(extra => {
-            let cantidad = cantidadesExtras[extra.id] || 0;
-
-            html += `
-                <div class="col-md-6 mb-3">
-                    <div class="border rounded p-2 h-100">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>${extra.nombre}</strong><br>
-                                <small class="text-muted">$ ${formatearPeso(extra.precio)}</small>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="cambiarCantidadExtra(${extra.id}, -1)">-</button>
-                                <span id="modal_cantidad_extra_${extra.id}">${cantidad}</span>
-                                <button type="button" class="btn btn-sm btn-outline-success" onclick="cambiarCantidadExtra(${extra.id}, 1)">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += `
-                </div>
-            </div>
-        `;
-    });
-
-    contenedor.innerHTML = html;
-}
-function renderSaboresEnModal(productoId) {
-    const contenedor = document.getElementById("modalExtrasContenido");
-    const reglasBox = document.getElementById("modalReglasProducto");
-
-    reglasBox.innerHTML = `
-        <div class="alert alert-info py-2 mb-3">
-            Distribuye la cantidad del producto entre los sabores.
-        </div>
-    `;
-
-    const sabores = saboresPorProducto[productoId] || [];
-
-    if (sabores.length === 0) {
-        contenedor.innerHTML = "<p class='text-muted'>Este producto no tiene sabores configurados.</p>";
-        return;
-    }
-
-    let html = `<div class="row">`;
-
-    sabores.forEach(sabor => {
-        let cantidad = cantidadesSabores[sabor.id] || 0;
-
-        html += `
-            <div class="col-md-6 mb-3">
-                <div class="border rounded p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <strong>${sabor.nombre}</strong>
-                        <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="cambiarCantidadSabor(${sabor.id}, -1)">-</button>
-                            <span id="cantidad_sabor_${sabor.id}">${cantidad}</span>
-                            <button type="button" class="btn btn-sm btn-outline-success" onclick="cambiarCantidadSabor(${sabor.id}, 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-
-    html += `</div>`;
-    contenedor.innerHTML = html;
-}
-function cambiarCantidadExtra(extraId, cambio) {
-    let actual = parseInt(cantidadesExtras[extraId]) || 0;
-    actual += cambio;
-
-    if (actual < 0) {
-        actual = 0;
-    }
-
-    cantidadesExtras[extraId] = actual;
-
-    const span = document.getElementById("modal_cantidad_extra_" + extraId);
-    if (span) {
-        span.textContent = actual;
-    }
-    actualizarSubtotalModal();
-}
-function actualizarSubtotalModal() {
-    if (!productoSeleccionado) return;
-
-    let precioBase = parseFloat(productoSeleccionado.precio) || 0;
-    let totalExtrasCobrados = 0;
-
-    if (productoSeleccionado.tipo === 'extras') {
-        let reglas = reglasProductos[productoSeleccionado.id] || {};
-
-        let usadosPorTipo = {};
-
-        extrasCatalogo.forEach(extra => {
-            let cantidad = parseInt(cantidadesExtras[extra.id]) || 0;
-
-            if (cantidad > 0) {
-                let tipo = extra.tipo;
-                let incluidosPermitidos = reglas[tipo] || 0;
-
-                if (!usadosPorTipo[tipo]) {
-                    usadosPorTipo[tipo] = 0;
-                }
-
-                for (let i = 1; i <= cantidad; i++) {
-                    usadosPorTipo[tipo]++;
-
-                    if (usadosPorTipo[tipo] > incluidosPermitidos) {
-                        totalExtrasCobrados += parseFloat(extra.precio);
-                    }
-                }
-            }
-        });
-    }
-
-    let totalProducto = precioBase + totalExtrasCobrados;
-
-    document.getElementById("modalPrecioBase").innerText = "$ " + formatearPeso(precioBase);
-    document.getElementById("modalExtrasCobrados").innerText = "$ " + formatearPeso(totalExtrasCobrados);
-    document.getElementById("modalTotalProducto").innerText = "$ " + formatearPeso(totalProducto);
-}
-function cambiarCantidadSabor(saborId, cambio) {
-    let actual = parseInt(cantidadesSabores[saborId]) || 0;
-    actual += cambio;
-
-    if (actual < 0) {
-        actual = 0;
-    }
-
-    cantidadesSabores[saborId] = actual;
-
-    const span = document.getElementById("cantidad_sabor_" + saborId);
-    if (span) {
-        span.textContent = actual;
-    }
-    actualizarSubtotalModal();
-}
-function totalSaboresSeleccionados() {
-    let total = 0;
-
-    Object.values(cantidadesSabores).forEach(c => {
-        total += parseInt(c) || 0;
-    });
-
-    return total;
-}
-function obtenerSaboresSeleccionados() {
-    const sabores = [];
-    const saboresProducto = saboresPorProducto[productoSeleccionado.id] || [];
-
-    saboresProducto.forEach(sabor => {
-        const cantidad = parseInt(cantidadesSabores[sabor.id]) || 0;
-
-        if (cantidad > 0) {
-            sabores.push({
-                id: sabor.id,
-                nombre: sabor.nombre,
-                cantidad: cantidad
-            });
-        }
-    });
-
-    return sabores;
-}
-// Ajusta esto con los IDs reales de tus productos
-const reglasProductos = <?php echo json_encode($reglasProductos, JSON_UNESCAPED_UNICODE); ?>;
-const extrasCatalogo = <?php echo json_encode($extrasData, JSON_UNESCAPED_UNICODE); ?>;
+/* Datos inyectados desde PHP — deben cargarse antes de ventas.js */
+const reglasProductos   = <?php echo json_encode($reglasProductos,  JSON_UNESCAPED_UNICODE); ?>;
+const extrasCatalogo    = <?php echo json_encode($extrasData,        JSON_UNESCAPED_UNICODE); ?>;
 const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNESCAPED_UNICODE); ?>;
-let cantidadesSabores = {};
-let cantidadesExtras = {};
-
-extrasCatalogo.forEach(extra => {
-    cantidadesExtras[extra.id] = 0;
-});
-function obtenerMetodoPago() {
-    let seleccionado = document.querySelector('input[name="metodo_pago"]:checked');
-    return seleccionado ? seleccionado.value : 'efectivo';
-}
-
-
-function obtenerExtrasSeleccionados() {
-    let extrasSeleccionados = [];
-
-    extrasCatalogo.forEach(extra => {
-        let cantidad = cantidadesExtras[extra.id] || 0;
-
-        if (cantidad > 0) {
-            extrasSeleccionados.push({
-                id: parseInt(extra.id),
-                nombre: extra.nombre,
-                precio: parseFloat(extra.precio),
-                tipo: extra.tipo,
-                cantidad: cantidad,
-                cantidad_incluida: 0,
-                cantidad_cobrada: 0
-            });
-        }
-    });
-
-    return extrasSeleccionados;
-}
-function obtenerPagos() {
-    return {
-        efectivo: parseFloat(document.getElementById('pago_efectivo').value) || 0,
-        nequi: parseFloat(document.getElementById('pago_nequi').value) || 0,
-        daviplata: parseFloat(document.getElementById('pago_daviplata').value) || 0,
-        transferencia: parseFloat(document.getElementById('pago_transferencia').value) || 0
-    };
-}
-
-function calcularTotalPagado() {
-    const pagos = obtenerPagos();
-    return pagos.efectivo + pagos.nequi + pagos.daviplata + pagos.transferencia;
-}
-function marcarPagoActivo(boton) {
-    document.querySelectorAll('.btn-pago-rapido').forEach(btn => {
-        btn.classList.remove('active-pay');
-    });
-
-    if (boton) {
-        boton.classList.add('active-pay');
-    }
-}
-
-function ocultarInputsPago() {
-    const box = document.getElementById('paymentInputs');
-
-    if (box) {
-        box.classList.remove('show');
-    }
-}
-
-function mostrarInputsPago() {
-    const box = document.getElementById('paymentInputs');
-
-    if (box) {
-        box.classList.add('show');
-    }
-}
-function mostrarCambioEfectivo(mostrar) {
-    const contenedor = document.getElementById("boxCambioEfectivo");
-
-    if (!contenedor) return;
-
-    if (mostrar) {
-        contenedor.classList.remove("d-none");
-    } else {
-        contenedor.classList.add("d-none");
-    }
-}
-function actualizarBotonEfectivo() {
-    const pagos = obtenerPagos();
-
-    const pagadoSinEfectivo =
-        pagos.nequi +
-        pagos.daviplata +
-        pagos.transferencia;
-
-    const faltante = total - pagadoSinEfectivo;
-
-    const btn = document.getElementById("btnCompletarEfectivo");
-
-    if (!btn) return;
-
-    if (faltante > 0) {
-        btn.textContent = "Faltan $" + faltante.toLocaleString();
-    } else {
-        btn.textContent = "Pago completo";
-    }
-}
-
-function seleccionarPagoSimple(metodo, boton) {
-    marcarPagoActivo(boton);
-    ocultarInputsPago();
-
-    document.getElementById("pago_efectivo").value = 0;
-    document.getElementById("pago_nequi").value = 0;
-    document.getElementById("pago_daviplata").value = 0;
-    document.getElementById("pago_transferencia").value = 0;
-
-    document.getElementById("pago_" + metodo).value = total;
-
-    if (metodo === "efectivo") {
-        document.getElementById("efectivo_recibido").value = total;
-    } else {
-        document.getElementById("efectivo_recibido").value = 0;
-    }
-
-    actualizarResumenPagos();
-}
-
-function activarPagoMixto(boton) {
-    marcarPagoActivo(boton);
-    mostrarInputsPago();
-
-    document.getElementById("pago_efectivo").value = 0;
-    document.getElementById("pago_nequi").value = 0;
-    document.getElementById("pago_daviplata").value = 0;
-    document.getElementById("pago_transferencia").value = 0;
-    document.getElementById("efectivo_recibido").value = 0;
-
-    actualizarResumenPagos();
-}
-function completarConEfectivo() {
-    const pagos = obtenerPagos();
-
-    const pagadoSinEfectivo =
-        pagos.nequi +
-        pagos.daviplata +
-        pagos.transferencia;
-
-    const faltante = total - pagadoSinEfectivo;
-
-    // Si ya está pago o se pasaron, no hacer nada
-    if (faltante <= 0) return;
-
-    // Completa el efectivo necesario
-    document.getElementById("pago_efectivo").value = faltante;
-
-    // Si paga exacto → también llenar recibido
-    document.getElementById("efectivo_recibido").value = faltante;
-
-    actualizarResumenPagos();
-}
-function pagoRapido(metodo) {
-    const metodos = ["efectivo", "nequi", "daviplata", "transferencia"];
-
-    metodos.forEach(m => {
-        const input = document.getElementById("pago_" + m);
-        input.value = 0;
-        input.dispatchEvent(new Event("input"));
-    });
-
-    const inputSeleccionado = document.getElementById("pago_" + metodo);
-    inputSeleccionado.value = total;
-    inputSeleccionado.dispatchEvent(new Event("input"));
-
-    actualizarResumenPagos();
-    validarPagoParaGuardar();
-}
-
-function obtenerEfectivoRecibido() {
-    const input = document.getElementById("efectivo_recibido");
-
-    if (!input) return 0;
-
-    return parseFloat(input.value) || 0;
-}
-
-function calcularVueltas() {
-    const pagos = obtenerPagos();
-    const efectivoRecibido = obtenerEfectivoRecibido();
-
-    if (pagos.efectivo <= 0) return 0;
-
-    if (efectivoRecibido > pagos.efectivo) {
-        return efectivoRecibido - pagos.efectivo;
-    }
-
-    return 0;
-}
-function controlarCambioPorEfectivo() {
-    const pagos = obtenerPagos();
-
-    if (pagos.efectivo > 0) {
-        mostrarCambioEfectivo(true);
-    } else {
-        mostrarCambioEfectivo(false);
-    }
-
-    actualizarResumenPagos();
-}
-
-function actualizarResumenPagos() {
-    const totalPagado = calcularTotalPagado();
-    const diferencia = total - totalPagado;
-    const vueltas = calcularVueltas();
-
-    document.getElementById('mostrarTotalVenta').textContent = `$ ${total.toLocaleString('es-CO')}`;
-    document.getElementById('mostrarTotalPagado').textContent = `$ ${totalPagado.toLocaleString('es-CO')}`;
-    document.getElementById('mostrarDiferencia').textContent = `$ ${diferencia.toLocaleString('es-CO')}`;
-
-    const mostrarVueltas = document.getElementById("mostrarVueltas");
-
-    if (mostrarVueltas) {
-        mostrarVueltas.textContent = `$ ${vueltas.toLocaleString('es-CO')}`;
-    }
-
-    validarPagoParaGuardar();
-    actualizarBotonEfectivo();
-}
-function validarPagoParaGuardar() {
-    const btn = document.getElementById("btnGuardarVenta");
-    if (!btn) return;
-
-    const pagos = obtenerPagos();
-    const totalPagado = calcularTotalPagado();
-    const efectivoRecibido = obtenerEfectivoRecibido();
-
-    const pagoCuadra = Math.abs(totalPagado - total) < 0.01;
-    const efectivoCorrecto = pagos.efectivo <= 0 || efectivoRecibido >= pagos.efectivo;
-
-    btn.disabled = !(
-        carrito.length > 0 &&
-        total > 0 &&
-        pagoCuadra &&
-        efectivoCorrecto
-    );
-}
-function limpiarExtrasSeleccionados() {
-    extrasCatalogo.forEach(extra => {
-        cantidadesExtras[extra.id] = 0;
-
-        const span = document.getElementById("modal_cantidad_extra_" + extra.id);
-        if (span) {
-            span.textContent = 0;
-        }
-    });
-}
-function limpiarSaboresSeleccionados() {
-    cantidadesSabores = {};
-}
-function seleccionarProducto(id, nombre, precio) {
-    productoSeleccionado = {
-        id: id,
-        nombre: nombre,
-        precio: precio
-    };
-
-    document.getElementById("productoSeleccionadoTexto").innerText = nombre + " - $ " + formatearPeso(precio);
-    document.getElementById("productoSeleccionadoBox").classList.remove("d-none");
-}
-
-function confirmarProductoSeleccionado() {
-    if (!productoSeleccionado) {
-        alert("Primero selecciona un producto");
-        return;
-    }
-    if (productoSeleccionado.tipo === 'sabores') {
-    const totalSabores = totalSaboresSeleccionados();
-    const piezas = obtenerCantidadProducto(productoSeleccionado.nombre);
-
-    if (piezas > 0) {
-        if (totalSabores !== piezas) {
-            alert(`Debes asignar exactamente ${piezas} piezas en sabores`);
-            return;
-        }
-    } else {
-        if (totalSabores < 1) {
-            alert("Debes seleccionar al menos 1 sabor");
-            return;
-        }
-
-        if (totalSabores > 1) {
-            alert("Este producto solo permite seleccionar 1 sabor");
-            return;
-        }
-    }
-}
-
-    agregarProductoConExtras(
-        productoSeleccionado.id,
-        productoSeleccionado.nombre,
-        productoSeleccionado.precio
-    );
-
-    const modalElement = document.getElementById('modalProducto');
-    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-    if (modalInstance) {
-        modalInstance.hide();
-    }
-    limpiarSaboresSeleccionados();
-
-    productoSeleccionado = null;
-}
-function obtenerCantidadProducto(nombre) {
-    nombre = nombre.toLowerCase();
-
-    if (nombre.includes("personal")) return 4;
-    if (nombre.includes("pareja")) return 10;
-    if (nombre.includes("familiar")) return 30;
-
-    if (nombre.includes("30")) return 30;
-    if (nombre.includes("20")) return 20;
-    if (nombre.includes("10")) return 10;
-    if (nombre.includes("4")) return 4;
-
-    return 0;
-}
-function generarClaveLinea(productoId, extras) {
-    let extrasClave = extras
-        .map(e => `${e.id}:${e.cantidad}`)
-        .sort()
-        .join("|");
-
-    return productoId + "|" + extrasClave;
-}
-
-function agregarProductoConExtras(id, nombre, precio) {
-    let extrasSeleccionados = obtenerExtrasSeleccionados();
-    let saboresSeleccionados = [];
-
-    if (productoSeleccionado && productoSeleccionado.tipo === 'sabores') {
-        saboresSeleccionados = obtenerSaboresSeleccionados();
-    }
-    let reglas = reglasProductos[id] || {};
-    let totalExtrasCobrados = 0;
-
-    // Lleva control acumulado por tipo
-    let usadosPorTipo = {};
-
-    extrasSeleccionados.forEach(extra => {
-        let tipo = extra.tipo;
-        let limiteGratis = parseInt(reglas[tipo] || 0);
-
-        if (!usadosPorTipo[tipo]) {
-            usadosPorTipo[tipo] = 0;
-        }
-
-        let disponiblesGratis = limiteGratis - usadosPorTipo[tipo];
-        if (disponiblesGratis < 0) {
-            disponiblesGratis = 0;
-        }
-
-        let cantidadIncluida = Math.min(extra.cantidad, disponiblesGratis);
-        let cantidadCobrada = extra.cantidad - cantidadIncluida;
-
-        extra.cantidad_incluida = cantidadIncluida;
-        extra.cantidad_cobrada = cantidadCobrada;
-
-        usadosPorTipo[tipo] += cantidadIncluida;
-        totalExtrasCobrados += cantidadCobrada * extra.precio;
-    });
-
-    let precioUnitarioLinea = precio + totalExtrasCobrados;
-    let clave = generarClaveLinea(id, extrasSeleccionados);
-
-    let productoExistente = carrito.find(item => item.clave === clave);
-
-    if (productoExistente) {
-        productoExistente.cantidad++;
-        productoExistente.subtotal += precioUnitarioLinea;
-    } else {
-        carrito.push({
-            clave: clave,
-            id: id,
-            nombre: nombre,
-            precio_base: precio,
-            cantidad: 1,
-            extras: extrasSeleccionados,
-            sabores: saboresSeleccionados,
-            subtotal: precioUnitarioLinea
-        });
-    }
-
-    total += precioUnitarioLinea;
-    renderCarrito();
-    limpiarExtrasSeleccionados();
-}
-
-function disminuirCantidad(index) {
-    let valorUnitario = carrito[index].subtotal / carrito[index].cantidad;
-
-    if (carrito[index].cantidad > 1) {
-        carrito[index].cantidad--;
-        carrito[index].subtotal -= valorUnitario;
-        total -= valorUnitario;
-    } else {
-        total -= carrito[index].subtotal;
-        carrito.splice(index, 1);
-    }
-
-    renderCarrito();
-}
-function aumentarCantidad(index) {
-    let valorUnitario = carrito[index].subtotal / carrito[index].cantidad;
-
-    carrito[index].cantidad++;
-    carrito[index].subtotal += valorUnitario;
-    total += valorUnitario;
-
-    renderCarrito();
-}
-function eliminar(index) {
-    total -= carrito[index].subtotal;
-    carrito.splice(index, 1);
-    renderCarrito();
-}
-
-function vaciarCarrito() {
-    carrito = [];
-    total = 0;
-
-    document.getElementById("pago_efectivo").value = 0;
-    document.getElementById("pago_nequi").value = 0;
-    document.getElementById("pago_daviplata").value = 0;
-    document.getElementById("pago_transferencia").value = 0;
-
-    const efectivoRecibidoInput = document.getElementById("efectivo_recibido");
-
-    if (efectivoRecibidoInput) {
-        efectivoRecibidoInput.value = 0;
-    }
-
-
-    renderCarrito();
-    actualizarResumenPagos();
-    limpiarExtrasSeleccionados();
-}
-
-function formatearPeso(valor) {
-    return new Intl.NumberFormat('es-CO').format(Math.round(valor));
-}
-
-function renderCarrito() {
-    let tabla = document.querySelector("#tabla tbody");
-    tabla.innerHTML = "";
-
-    if (carrito.length === 0) {
-        tabla.innerHTML = `
-            <tr>
-                <td colspan="4" class="text-center text-muted">No hay productos en el carrito</td>
-            </tr>
-        `;
-    } else {
-        carrito.forEach((item, index) => {
-            let extrasTexto = item.extras.length > 0
-                ? item.extras.map(extra => {
-                    let partes = [];
-
-                    if (extra.cantidad_incluida > 0) {
-                        partes.push(`${extra.cantidad_incluida} incluido`);
-                    }
-
-                    if (extra.cantidad_cobrada > 0) {
-                        partes.push(`${extra.cantidad_cobrada} cobrado (+$${formatearPeso(extra.cantidad_cobrada * extra.precio)})`);
-                    }
-
-                    return `${extra.nombre} x${extra.cantidad} [${partes.join(", ")}]`;
-                }).join(", ")
-                : "";
-
-            let saboresTexto = "";
-
-            if (item.sabores && item.sabores.length > 0) {
-                saboresTexto = item.sabores.map(sabor =>
-                    `${sabor.nombre} x${sabor.cantidad}`
-                ).join(", ");
-            }
-
-            tabla.innerHTML += `
-                <tr>
-                    <td>
-                        <strong>${item.nombre}</strong>
-                        <span class="detalle-extra">
-                            ${saboresTexto ? 'Sabores: ' + saboresTexto : ''}
-                            ${saboresTexto && extrasTexto ? '<br>' : ''}
-                            ${extrasTexto || (!saboresTexto ? 'Sin extras' : '')}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center gap-2">
-                            <button class="btn btn-warning btn-sm" onclick="disminuirCantidad(${index})">-</button>
-                            <span class="fw-bold">${item.cantidad}</span>
-                            <button class="btn btn-success btn-sm" onclick="aumentarCantidad(${index})">+</button>
-                        </div>
-                    </td>
-                    <td>$ ${formatearPeso(item.subtotal)}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="eliminar(${index})">X</button>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    document.getElementById("total").innerText = formatearPeso(total);
-    actualizarResumenPagos();
-}
-function abrirConfiguracionProducto(id, nombre, precio) {
-    productoSeleccionado = { id, nombre, precio };
-    limpiarExtras();
-    cargarReglasProducto(id);
-    mostrarModalProducto();
-}
-function guardarVenta() {
-    const btn = document.getElementById("btnGuardarVenta");
-
-    if (btn.disabled) return;
-
-    // bloquear botón
-    btn.disabled = true;
-    btn.innerText = "Guardando...";
-    if (carrito.length === 0) {
-        alert("El carrito está vacío");
-        btn.disabled = false;
-        btn.innerText = "Guardar venta";
-        return;
-    }
-
-    const pagos = obtenerPagos();
-    const totalPagado = calcularTotalPagado();
-
-    if (totalPagado <= 0) {
-        alert("Debes ingresar al menos un valor de pago");
-        btn.disabled = false;
-        btn.innerText = "Guardar venta";
-        return;
-    }
-
-    if (Math.abs(totalPagado - total) > 0.01) {
-        alert("La suma de los pagos debe ser igual al total de la venta");
-        btn.disabled = false;
-        btn.innerText = "Guardar venta";
-        return;
-    }
-    const efectivoRecibido = obtenerEfectivoRecibido();
-
-    if (pagos.efectivo > 0 && efectivoRecibido < pagos.efectivo) {
-        alert("El dinero recibido en efectivo no alcanza para cubrir el pago en efectivo");
-        btn.disabled = false;
-        btn.innerText = "Guardar venta";
-        return;
-    }
-
-    fetch("../controllers/ventascontroller.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            carrito,
-            total,
-            pagos
-        })
-    })
-    .then(response => response.text())
-    .then(data => {
-        alert(data);
-
-        if (data.toLowerCase().includes("correctamente")) {
-            carrito = [];
-            total = 0;
-
-            document.getElementById("pago_efectivo").value = 0;
-            document.getElementById("pago_nequi").value = 0;
-            document.getElementById("pago_daviplata").value = 0;
-            document.getElementById("pago_transferencia").value = 0;
-            const efectivoRecibidoInput = document.getElementById("efectivo_recibido");
-
-            if (efectivoRecibidoInput) {
-                efectivoRecibidoInput.value = 0;
-            }
-
-
-            limpiarExtrasSeleccionados();
-            limpiarSaboresSeleccionados();
-
-            renderCarrito();
-            actualizarResumenPagos();
-
-            const btn = document.getElementById("btnGuardarVenta");
-            btn.innerText = "Guardar venta";
-            btn.disabled = true;
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("Error al guardar la venta");
-
-        btn.disabled = false;
-        btn.innerText = "Guardar venta";
-    });
-}
-
-renderCarrito();
-document.querySelectorAll('.pago-input').forEach(input => {
-    input.addEventListener('input', function () {
-        if (input.id === "pago_efectivo") {
-            const pagos = obtenerPagos();
-
-            if (pagos.efectivo > 0) {
-                mostrarCambioEfectivo(true);
-            } else {
-                mostrarCambioEfectivo(false);
-            }
-        }
-
-        actualizarResumenPagos();
-    });
-});
-const inputEfectivoRecibido = document.getElementById("efectivo_recibido");
-
-if (inputEfectivoRecibido) {
-    inputEfectivoRecibido.addEventListener("input", actualizarResumenPagos);
-}
 </script>
+<script src="../assets/js/ventas.js"></script>
 
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
 
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-producto-dialog">
 
         <div class="modal-content">
 
@@ -1832,11 +628,116 @@ if (inputEfectivoRecibido) {
                 <button
                     type="button"
                     class="btn btn-success"
+                    id="btnConfirmarModalProducto"
                     onclick="confirmarProductoSeleccionado()"
                 >
                     Agregar al carrito
                 </button>
 
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade modal-checkout-left" id="modalResumenPedido" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-scrollable modal-resumen-dialog">
+
+        <div class="modal-content resumen-modal">
+
+            <div class="modal-header resumen-header">
+
+                <h5 class="modal-title fw-bold fs-5 mb-0">🧾 Confirmar pedido</h5>
+
+                <div class="resumen-header-actions">
+                    <div id="resumenLecturaHeader"></div>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        onclick="cerrarCheckout()"
+                    ></button>
+                </div>
+
+            </div>
+
+            <div class="modal-body">
+                <div id="resumenPedidoContenido"></div>
+            </div>
+
+            <div class="modal-footer justify-content-between">
+                <div class="resumen-total-modal">
+                    Total: <strong id="resumenPedidoTotal">$ 0</strong>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        onclick="vaciarCarrito()"
+                    >
+                        Vaciar carrito
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                    >
+                        Continuar venta
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade modal-checkout-right" id="modalPagoPedido" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-pago-side-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Confirmar cobro</h5>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary btn-min-pago"
+                    id="btnMinimizarPagoCheckout"
+                    aria-pressed="false"
+                    title="Minimizar cobro"
+                    onclick="toggleMinimizarPagoCheckout()"
+                >
+                    -
+                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    onclick="cerrarCheckout()"
+                ></button>
+            </div>
+
+            <div class="modal-body p-0">
+                <div id="paymentDockTarget"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-success w-100"
+                    id="btnConfirmarGuardarPago"
+                    onclick="guardarVenta('checkout')"
+                    disabled
+                >
+                    ✔ Confirmar y guardar
+                </button>
             </div>
 
         </div>

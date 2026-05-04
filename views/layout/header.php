@@ -22,11 +22,17 @@ $rol = $_SESSION['rol'] ?? 'vendedor';
             <div class="name"><?php echo htmlspecialchars($nombre); ?></div>
             <div class="role"><?php echo htmlspecialchars($rol); ?></div>
         </div>
-
+        <?php if ($_SESSION['rol'] == 'admin') { ?>
         <a href="/Qdelicias/views/dashboard.php" class="btn-custom btn-dashboard">Dashboard</a>
+        <?php } else { ?>
+        <a href="reporte_ventas.php" class="btn btn-info btn-sm">Ver Reportes</a>
+        <?php } ?>
+
         <a href="/Qdelicias/views/ventas.php" class="btn-custom btn-ventas">Ventas</a>
         <a href="/Qdelicias/controllers/logout.php" class="btn-custom btn-logout">Cerrar sesión</a>
 
     </div>
 
 </div>
+  
+        
