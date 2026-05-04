@@ -34,7 +34,12 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-$productos = $conn->query("SELECT * FROM productos ORDER BY nombre ASC");
+$productos = $conn->query("
+    SELECT * 
+    FROM productos 
+    WHERE estado = 1
+    ORDER BY nombre ASC
+");
 $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
 $saboresPorProducto = [];
 

@@ -25,8 +25,10 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
 
 <body class="bg-light">
 
-<div class="container-fluid pt-5 mt-4">
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
+
+<div style="margin-left:250px; padding:86px 20px 20px 20px;">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
@@ -159,7 +161,8 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                 <th>Precio</th>
                 <th>Categoría</th>
                 <th>Tipo</th>
-                <th width="260">Acciones</th>
+                <th>Estado</th>
+                <th width="310">Acciones</th>
             </tr>
         </thead>
 
@@ -185,29 +188,123 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                 <td>$ <?php echo number_format($p['precio'], 0, ',', '.'); ?></td>
                 <td><?php echo $p['categoria'] ?? 'Sin categoría'; ?></td>
                 <td><?php echo $p['tipo_configuracion']; ?></td>
+                <td>
+                    <?php if ($p['estado'] == 1) { ?>
+                        <span class="badge bg-success">Activo</span>
+                    <?php } else { ?>
+                        <span class="badge bg-secondary">Inactivo</span>
+                    <?php } ?>
+                </td>
 
                 <td>
-                    <button 
-                        type="button"
-                        class="btn btn-warning btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalEditar<?php echo $p['id']; ?>"
-                    >
-                        Editar
-                    </button>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button 
+                            class="btn btn-sm btn-outline-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEditar<?php echo $p['id']; ?>"
+                        >
+                            Editar
+                        </button>
 
-                    <a href="producto_sabores.php?producto_id=<?php echo $p['id']; ?>" class="btn btn-info btn-sm">
-                        Sabores
-                    </a>
+                            <?php if ($p['tipo_configuracion'] == 'sabores') { ?>
 
-                    <form action="../controllers/productoController.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="accion" value="eliminar">
-                        <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
+                                <a 
+                                    href="producto_sabores.php?id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-info"
+                                >
+                                    Sabores
+                                </a>
 
-                        <button class="btn btn-danger btn-sm">X</button>
-                    </form>
+                            <?php } elseif ($p['tipo_configuracion'] == 'extras') { ?>
+
+                                <a 
+                                    href="reglas_producto.php?producto_id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Reglas extras
+                                </a>
+
+                            <?php } ?>
+                        <?php if ($p['estado'] == 1) { ?>
+                            <a 
+                                href="../controllers/productoController.php?accion=desactivar&id=<?php echo $p['id']; ?>" 
+                                class="btn btn-sm btn-outline-secondary"
+                            >
+                                Desactivar
+                            </a>
+                        <?php } else { ?>
+                            <a 
+                                href="../controllers/productoController.php?accion=activar&id=<?php echo $p['id']; ?>" 
+                                class="btn btn-sm btn-outline-success"
+                            >
+                                Activar
+                            </a>
+                        <?php } ?>
+
+                        <button 
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEliminar<?php echo $p['id']; ?>"
+                        >
+                            Eliminar
+                        </button>
+                    </div>
                 </td>
             </tr>
+            <!-- MODAL CONFIRMAR ELIMINAR -->
+            <div class="modal fade" id="modalEliminar<?php echo $p['id']; ?>" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Eliminar producto</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p class="mb-1">¿Seguro que deseas eliminar este producto?</p>
+                            <strong><?php echo htmlspecialchars($p['nombre']); ?></strong>
+
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <strong>Advertencia:</strong> si este producto ya fue vendido o está relacionado con extras, sabores o reportes, eliminarlo puede romper el historial del sistema.
+                            <br>
+                            Lo recomendado es usar <strong>Desactivar</strong> para que no aparezca en ventas, pero siga disponible en reportes.
+                        </div>
+                        </div>
+                        
+
+                        <div class="modal-footer">
+                            <?php if ($p['estado'] == 1) { ?>
+                                <a 
+                                    href="../controllers/productoController.php?accion=desactivar&id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-secondary"
+                                >
+                                    Desactivar
+                                </a>
+                            <?php } else { ?>
+                                <a 
+                                    href="../controllers/productoController.php?accion=activar&id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-success"
+                                >
+                                    Activar
+                                </a>
+                            <?php } ?>
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+
+                            <a 
+                                href="../controllers/productoController.php?accion=eliminar&id=<?php echo $p['id']; ?>" 
+                                class="btn btn-danger"
+                            >
+                                Sí, eliminar
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
 
             <!-- MODAL EDITAR -->
             <div class="modal fade" id="modalEditar<?php echo $p['id']; ?>" tabindex="-1">
@@ -290,7 +387,6 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 function filtrarProductos() {
@@ -315,5 +411,7 @@ document.getElementById('buscadorProductos').addEventListener('input', filtrarPr
 document.getElementById('filtroCategoria').addEventListener('change', filtrarProductos);
 document.getElementById('filtroTipo').addEventListener('change', filtrarProductos);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
