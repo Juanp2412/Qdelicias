@@ -25,7 +25,7 @@ $rol = $_SESSION['rol'] ?? 'vendedor';
 
         <a href="/Qdelicias/views/dashboard.php" class="btn-custom btn-dashboard">Dashboard</a>
         <a href="/Qdelicias/views/ventas.php" class="btn-custom btn-ventas">Ventas</a>
-        <a href="/Qdelicias/controllers/logout.php" class="btn-custom btn-logout">Salir</a>
+        <a href="/Qdelicias/controllers/logout.php" class="btn-custom btn-logout">Cerrar sesión</a>
 
     </div>
 

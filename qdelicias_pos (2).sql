@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-05-2026 a las 02:49:20
+-- Tiempo de generación: 04-05-2026 a las 11:37:45
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -29,24 +29,25 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `categorias` (
   `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL
+  `nombre` varchar(100) NOT NULL,
+  `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `categorias`
 --
 
-INSERT INTO `categorias` (`id`, `nombre`) VALUES
-(1, 'Alitas'),
-(2, 'Waffles'),
-(3, 'Fresas'),
-(4, 'Mini waffles'),
-(5, 'Malteadas'),
-(6, 'Obleas'),
-(7, 'Jugos'),
-(9, 'Combos'),
-(10, 'Gaseosas'),
-(11, 'Merengones');
+INSERT INTO `categorias` (`id`, `nombre`, `estado`) VALUES
+(1, 'Alitas', 1),
+(2, 'Waffles', 1),
+(3, 'Fresas', 1),
+(4, 'Mini waffles', 1),
+(5, 'Malteadas', 1),
+(6, 'Obleas', 1),
+(7, 'Jugos', 1),
+(9, 'Combos', 1),
+(10, 'Gaseosas', 1),
+(11, 'Merengones', 1);
 
 -- --------------------------------------------------------
 
@@ -191,7 +192,8 @@ INSERT INTO `detalle_venta` (`id`, `venta_id`, `producto_id`, `cantidad`, `preci
 (122, 76, 13, 1, 7500.00),
 (123, 77, 2, 1, 7000.00),
 (124, 78, 24, 1, 5000.00),
-(125, 78, 27, 1, 7000.00);
+(125, 78, 27, 1, 7000.00),
+(126, 79, 16, 1, 22000.00);
 
 -- --------------------------------------------------------
 
@@ -369,7 +371,8 @@ INSERT INTO `detalle_venta_sabores` (`id`, `detalle_venta_id`, `sabor_id`, `cant
 (28, 119, 1, 2),
 (29, 119, 2, 2),
 (30, 124, 12, 1),
-(31, 125, 10, 1);
+(31, 125, 10, 1),
+(32, 126, 2, 10);
 
 -- --------------------------------------------------------
 
@@ -381,28 +384,29 @@ CREATE TABLE `extras` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) DEFAULT NULL,
   `precio` decimal(10,2) DEFAULT NULL,
-  `tipo` varchar(50) DEFAULT NULL
+  `tipo` varchar(50) DEFAULT NULL,
+  `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `extras`
 --
 
-INSERT INTO `extras` (`id`, `nombre`, `precio`, `tipo`) VALUES
-(1, 'Helado de Vainilla ', 3000.00, 'helado'),
-(2, 'Helado de Fresa', 3000.00, 'helado'),
-(3, 'Helado de Oreo', 3000.00, 'helado'),
-(5, 'Mani', 1500.00, 'topping clasico'),
-(6, 'Gusanitos de goma', 1500.00, 'topping clasico'),
-(7, 'Durazno', 500.00, 'salsa'),
-(8, 'chocolate', 500.00, 'salsa'),
-(9, 'Fruta del dia', 1000.00, 'Fruta del dia'),
-(10, 'Salsa Mora', 500.00, 'salsa'),
-(11, 'Boli Pop Morada', 2000.00, 'topping premium'),
-(12, 'Trululus', 1500.00, 'topping clasico'),
-(13, 'Arequipe', 500.00, 'salsa'),
-(14, 'Boli Pop Rojo', 2000.00, 'topping premium'),
-(15, 'Boli Pop de Calabaza ', 2000.00, 'topping premium');
+INSERT INTO `extras` (`id`, `nombre`, `precio`, `tipo`, `estado`) VALUES
+(1, 'Helado de Vainilla ', 3000.00, 'helado', 1),
+(2, 'Helado de Fresa', 3000.00, 'helado', 1),
+(3, 'Helado de Oreo', 3000.00, 'helado', 1),
+(5, 'Mani', 1500.00, 'topping clasico', 1),
+(6, 'Gusanitos de goma', 1500.00, 'topping clasico', 1),
+(7, 'Durazno', 500.00, 'salsa', 1),
+(8, 'chocolate', 500.00, 'salsa', 1),
+(9, 'Fruta del dia', 1000.00, 'Fruta del dia', 1),
+(10, 'Salsa Mora', 500.00, 'salsa', 1),
+(11, 'Boli Pop Morada', 2000.00, 'topping premium', 1),
+(12, 'Trululus', 1500.00, 'topping clasico', 1),
+(13, 'Arequipe', 500.00, 'salsa', 1),
+(14, 'Boli Pop Rojo', 2000.00, 'topping premium', 1),
+(15, 'Boli Pop de Calabaza ', 1999.99, 'topping premium', 1);
 
 -- --------------------------------------------------------
 
@@ -416,38 +420,39 @@ CREATE TABLE `productos` (
   `precio` decimal(10,2) DEFAULT NULL,
   `imagen` varchar(255) DEFAULT NULL,
   `categoria_id` int(11) DEFAULT NULL,
-  `tipo_configuracion` varchar(50) DEFAULT 'extras'
+  `tipo_configuracion` varchar(50) DEFAULT 'extras',
+  `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `nombre`, `precio`, `imagen`, `categoria_id`, `tipo_configuracion`) VALUES
-(1, 'Fresa Mini', 5000.00, 'assets/img/productos/producto_69eca58f8536c.jpg', 3, 'extras'),
-(2, 'Fresa Clásica', 7000.00, 'assets/img/productos/producto_69eca5611f9ad.jpg', 3, 'extras'),
-(3, 'Waffle Sencillo', 12000.00, 'assets/img/productos/producto_69eca3f708e44.jpg', 2, 'extras'),
-(4, 'Waffle Especial', 15000.00, 'assets/img/productos/producto_69eca3ed531be.png', 2, 'extras'),
-(5, 'Oblea Clásica', 3000.00, 'assets/img/productos/producto_69eca60adfe22.jpg', 6, 'extras'),
-(6, 'Malteada Oreo', 11000.00, 'assets/img/productos/producto_69eca3e2664d4.jpg', 5, 'simple'),
-(8, 'Fresa Premium', 20000.00, 'assets/img/productos/producto_69eca357505b3.jpg', 3, 'extras'),
-(9, 'Oblea Mix', 4500.00, 'assets/img/productos/producto_69eca5fad81e8.jpg', 6, 'extras'),
-(12, 'Oblea Plus', 6500.00, 'assets/img/productos/producto_69eca5f317a73.jpg', 6, 'extras'),
-(13, 'Mini Waffle Plus', 7500.00, 'assets/img/productos/producto_69eca33fa6cec.jpg', 4, 'extras'),
-(14, 'Oblea Premium', 7500.00, 'assets/img/productos/producto_69eca56a877c5.jpg', 6, 'extras'),
-(15, 'Alitas Personales', 10000.00, 'assets/img/productos/producto_69ec99f7cd5e5.webp', 1, 'sabores'),
-(16, 'Alas Pareja ', 22000.00, 'assets/img/productos/producto_69eca1806f91e.jpg', 1, 'sabores'),
-(17, 'Alas Familiar', 58000.00, 'assets/img/productos/producto_69eca16c9aff4.jpg', 1, 'sabores'),
-(18, 'Malteada Fresa', 10000.00, 'assets/img/productos/producto_69eca32b851e7.jpg', 5, 'simple'),
-(19, 'Malteada Vainilla', 10000.00, 'assets/img/productos/producto_69eca29fc86bf.jpg', 5, 'simple'),
-(20, 'Mini Waffle Clasico', 4000.00, 'assets/img/productos/producto_69ec9d7715813.jpg', 4, 'extras'),
-(21, 'Mini Waffle Mix', 6000.00, 'assets/img/productos/producto_69ec9d2f5f9cd.jpeg', 4, 'extras'),
-(23, 'Limonada de Coco', 7000.00, 'assets/img/productos/producto_69ec9ace29ce0.jpg', 7, 'simple'),
-(24, 'Jugos en agua', 5000.00, 'assets/img/productos/producto_69efff1e3457c.jpg', 7, 'sabores'),
-(25, 'Fresas Mix', 10000.00, 'assets/img/productos/producto_69f00c1e9e8fa.jpg', 3, 'extras'),
-(26, 'Fresas Plus', 15000.00, 'assets/img/productos/producto_69f00c7c705b9.jpg', 3, 'extras'),
-(27, 'Jugos en leche', 7000.00, 'assets/img/productos/producto_69f00d2551aad.jpg', 7, 'sabores'),
-(28, 'Alas x 20', 40000.00, 'assets/img/productos/producto_69f2968841208.jpg', 1, 'sabores');
+INSERT INTO `productos` (`id`, `nombre`, `precio`, `imagen`, `categoria_id`, `tipo_configuracion`, `estado`) VALUES
+(1, 'Fresa Mini', 5000.00, 'assets/img/productos/producto_69eca58f8536c.jpg', 3, 'extras', 1),
+(2, 'Fresa Clásica', 7000.00, 'assets/img/productos/producto_69eca5611f9ad.jpg', 3, 'extras', 1),
+(3, 'Waffle Sencillo', 12000.00, 'assets/img/productos/producto_69eca3f708e44.jpg', 2, 'extras', 1),
+(4, 'Waffle Especial', 15000.00, 'assets/img/productos/producto_69eca3ed531be.png', 2, 'extras', 1),
+(5, 'Oblea Clásica', 3000.00, 'assets/img/productos/producto_69eca60adfe22.jpg', 6, 'extras', 1),
+(6, 'Malteada Oreo', 11000.00, 'assets/img/productos/producto_69eca3e2664d4.jpg', 5, 'simple', 1),
+(8, 'Fresa Premium', 20000.00, 'assets/img/productos/producto_69eca357505b3.jpg', 3, 'extras', 1),
+(9, 'Oblea Mix', 4500.00, 'assets/img/productos/producto_69eca5fad81e8.jpg', 6, 'extras', 1),
+(12, 'Oblea Plus', 6500.00, 'assets/img/productos/producto_69eca5f317a73.jpg', 6, 'extras', 1),
+(13, 'Mini Waffle Plus', 7500.00, 'assets/img/productos/producto_69eca33fa6cec.jpg', 4, 'extras', 1),
+(14, 'Oblea Premium', 7500.00, 'assets/img/productos/producto_69eca56a877c5.jpg', 6, 'extras', 1),
+(15, 'Alas Personales', 10000.00, 'assets/img/productos/producto_69ec99f7cd5e5.webp', 1, 'sabores', 1),
+(16, 'Alas Pareja ', 22000.00, 'assets/img/productos/producto_69eca1806f91e.jpg', 1, 'sabores', 1),
+(17, 'Alas Familiar', 58000.00, 'assets/img/productos/producto_69eca16c9aff4.jpg', 1, 'sabores', 1),
+(18, 'Malteada Fresa', 10000.00, 'assets/img/productos/producto_69eca32b851e7.jpg', 5, 'simple', 1),
+(19, 'Malteada Vainilla', 10000.00, 'assets/img/productos/producto_69eca29fc86bf.jpg', 5, 'simple', 1),
+(20, 'Mini Waffle Clasico', 4000.00, 'assets/img/productos/producto_69ec9d7715813.jpg', 4, 'extras', 1),
+(21, 'Mini Waffle Mix', 6000.00, 'assets/img/productos/producto_69ec9d2f5f9cd.jpeg', 4, 'extras', 1),
+(23, 'Limonada de Coco', 7000.00, 'assets/img/productos/producto_69ec9ace29ce0.jpg', 7, 'simple', 1),
+(24, 'Jugos en agua', 5000.00, 'assets/img/productos/producto_69efff1e3457c.jpg', 7, 'sabores', 1),
+(25, 'Fresas Mix', 10000.00, 'assets/img/productos/producto_69f00c1e9e8fa.jpg', 3, 'extras', 1),
+(26, 'Fresas Plus', 15000.00, 'assets/img/productos/producto_69f00c7c705b9.jpg', 3, 'extras', 1),
+(27, 'Jugos en leche', 7000.00, 'assets/img/productos/producto_69f00d2551aad.jpg', 7, 'sabores', 1),
+(28, 'Alas x 20', 40000.00, 'assets/img/productos/producto_69f2968841208.jpg', 1, 'sabores', 1);
 
 -- --------------------------------------------------------
 
@@ -508,11 +513,6 @@ INSERT INTO `producto_sabores` (`id`, `producto_id`, `sabor_id`) VALUES
 (9, 15, 2),
 (10, 16, 2),
 (11, 17, 2),
-(37, 27, 8),
-(38, 27, 10),
-(39, 27, 9),
-(40, 27, 6),
-(41, 27, 7),
 (44, 28, 1),
 (45, 28, 2),
 (46, 24, 8),
@@ -520,7 +520,13 @@ INSERT INTO `producto_sabores` (`id`, `producto_id`, `sabor_id`) VALUES
 (48, 24, 9),
 (49, 24, 12),
 (50, 24, 6),
-(51, 24, 7);
+(51, 24, 7),
+(52, 27, 8),
+(53, 27, 10),
+(54, 27, 9),
+(55, 27, 12),
+(56, 27, 6),
+(57, 27, 7);
 
 -- --------------------------------------------------------
 
@@ -557,19 +563,20 @@ INSERT INTO `sabores` (`id`, `nombre`, `activo`, `tipo`) VALUES
 
 CREATE TABLE `tipos_extra` (
   `id` int(11) NOT NULL,
-  `nombre` varchar(50) NOT NULL
+  `nombre` varchar(50) NOT NULL,
+  `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tipos_extra`
 --
 
-INSERT INTO `tipos_extra` (`id`, `nombre`) VALUES
-(5, 'Fruta del dia'),
-(3, 'helado'),
-(1, 'salsa'),
-(2, 'topping clasico'),
-(4, 'topping premium');
+INSERT INTO `tipos_extra` (`id`, `nombre`, `estado`) VALUES
+(1, 'salsa', 1),
+(2, 'topping clasico', 1),
+(3, 'helado', 1),
+(4, 'topping premium', 1),
+(5, 'Fruta del dia', 1);
 
 -- --------------------------------------------------------
 
@@ -582,16 +589,18 @@ CREATE TABLE `usuarios` (
   `usuario` varchar(50) DEFAULT NULL,
   `contraseña` varchar(100) DEFAULT NULL,
   `rol` varchar(20) DEFAULT NULL,
-  `nombre` varchar(100) DEFAULT NULL
+  `nombre` varchar(100) DEFAULT NULL,
+  `estado` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `usuario`, `contraseña`, `rol`, `nombre`) VALUES
-(1, 'admin', '1234', 'admin', 'Carolina'),
-(2, 'vendedor1', '1234', 'vendedor', 'Laura');
+INSERT INTO `usuarios` (`id`, `usuario`, `contraseña`, `rol`, `nombre`, `estado`) VALUES
+(1, 'admin', '1234', 'admin', 'Carolina', 1),
+(2, 'vendedor1', '1234', 'vendedor', 'Laura', 1),
+(3, 'santiago', '1234', 'vendedor', 'Santiago', 1);
 
 -- --------------------------------------------------------
 
@@ -688,7 +697,8 @@ INSERT INTO `ventas` (`id`, `fecha`, `total`, `metodo_pago`) VALUES
 (75, '2026-04-29 21:35:38', 3000.00, 'efectivo'),
 (76, '2026-04-30 22:37:16', 37500.00, 'mixto'),
 (77, '2026-04-30 22:46:58', 7000.00, 'efectivo'),
-(78, '2026-04-30 22:49:51', 12000.00, 'nequi');
+(78, '2026-04-30 22:49:51', 12000.00, 'nequi'),
+(79, '2026-05-04 04:06:20', 22000.00, 'efectivo');
 
 -- --------------------------------------------------------
 
@@ -783,7 +793,8 @@ INSERT INTO `venta_pagos` (`id`, `venta_id`, `metodo_pago`, `monto`) VALUES
 (73, 76, 'efectivo', 17500.00),
 (74, 76, 'nequi', 20000.00),
 (75, 77, 'efectivo', 7000.00),
-(76, 78, 'nequi', 12000.00);
+(76, 78, 'nequi', 12000.00),
+(77, 79, 'efectivo', 22000.00);
 
 --
 -- Índices para tablas volcadas
@@ -882,13 +893,13 @@ ALTER TABLE `venta_pagos`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta_extras`
@@ -900,61 +911,61 @@ ALTER TABLE `detalle_venta_extras`
 -- AUTO_INCREMENT de la tabla `detalle_venta_sabores`
 --
 ALTER TABLE `detalle_venta_sabores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `extras`
 --
 ALTER TABLE `extras`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `producto_reglas_extras`
 --
 ALTER TABLE `producto_reglas_extras`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `producto_sabores`
 --
 ALTER TABLE `producto_sabores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT de la tabla `sabores`
 --
 ALTER TABLE `sabores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_extra`
 --
 ALTER TABLE `tipos_extra`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT de la tabla `venta_pagos`
 --
 ALTER TABLE `venta_pagos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- Restricciones para tablas volcadas
