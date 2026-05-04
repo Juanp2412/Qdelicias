@@ -75,6 +75,15 @@ if (!empty($fecha_inicio) && !empty($fecha_fin)) {
         LIMIT 10
     ");
 }
+$rol = $_SESSION['rol'];
+
+if ($rol == 'vendedor') {
+    $fechaInicio = date('Y-m-d');
+    $fechaFin = date('Y-m-d');
+} else {
+    $fechaInicio = $_GET['fecha_inicio'] ?? date('Y-m-d');
+    $fechaFin = $_GET['fecha_fin'] ?? date('Y-m-d');
+}
 ?>
 
 <!DOCTYPE html>
@@ -98,6 +107,7 @@ if (!empty($fecha_inicio) && !empty($fecha_fin)) {
 <?php include 'layout/sidebar.php'; ?>
 
 <div class="main-content">
+    <?php if ($_SESSION['rol'] == 'admin') { ?>
     <div class="card p-4 mb-4">
         <h3 class="mb-3">Reporte de ventas por fechas</h3>
 
@@ -119,6 +129,11 @@ if (!empty($fecha_inicio) && !empty($fecha_fin)) {
             </div>
         </form>
     </div>
+    <?php } else { ?>
+    <div class="alert alert-info">
+        Estás viendo únicamente el reporte de ventas del día.
+    </div>
+    <?php } ?>
 
     <div class="row mb-4">
         <div class="col-md-6 mb-3">

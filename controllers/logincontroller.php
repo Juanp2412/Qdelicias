@@ -26,7 +26,7 @@ if ($resultado->num_rows > 0) {
     $_SESSION['nombre'] = $user['nombre'] ?? $user['usuario'];
 
     if ($user['rol'] == 'vendedor') {
-        header("Location: ../views/ventas.php");
+        header("Location: ../views/reporte_ventas.php");
     } else {
         header("Location: ../views/dashboard.php");
     }

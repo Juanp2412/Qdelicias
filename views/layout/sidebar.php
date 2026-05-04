@@ -15,9 +15,16 @@ function activo($pagina, $paginaActual) {
 
     <div class="section">General</div>
 
-    <a href="/Qdelicias/views/dashboard.php" class="<?php echo activo('dashboard.php', $paginaActual); ?>">📊 Dashboard</a>
+    <?php if ($rol == 'admin') { ?>
+
+        <a href="/Qdelicias/views/dashboard.php" class="<?php echo activo('dashboard.php', $paginaActual); ?>">📊 Dashboard</a>
+
+    <?php } ?>
+
     <a href="/Qdelicias/views/ventas.php" class="<?php echo activo('ventas.php', $paginaActual); ?>">💰 Ventas</a>
+
     <a href="/Qdelicias/views/reporte_ventas.php" class="<?php echo activo('reporte_ventas.php', $paginaActual); ?>">📈 Reportes</a>
+
 
     <?php if ($rol == 'admin') { ?>
 

@@ -490,8 +490,19 @@ body {
         </div>
 
         <div class="d-flex gap-2">
-            <a href="dashboard.php" class="btn btn-light btn-sm">Dashboard</a>
+
+            <?php if ($_SESSION['rol'] == 'admin') { ?>
+
+                <a href="dashboard.php" class="btn btn-light btn-sm">Dashboard</a>
+
+            <?php } else { ?>
+
+                <a href="reporte_ventas.php" class="btn btn-info btn-sm">Ver Reportes</a>
+
+            <?php } ?>
+
             <a href="../controllers/logout.php" class="btn btn-danger btn-sm">Cerrar sesión</a>
+
         </div>
 
     </div>
