@@ -40,7 +40,12 @@ $productos = $conn->query("
     WHERE estado = 1
     ORDER BY nombre ASC
 ");
-$categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+$categorias = $conn->query("
+    SELECT * 
+    FROM categorias 
+    WHERE estado = 1
+    ORDER BY nombre ASC
+");
 $saboresPorProducto = [];
 
 $sqlSabores = "SELECT ps.producto_id, s.id, s.nombre

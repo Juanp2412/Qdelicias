@@ -12,7 +12,7 @@ $productos = $conn->query("
     ORDER BY p.id DESC
 ");
 
-$categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+$categorias = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
 ?>
 
 <!DOCTYPE html>
@@ -77,7 +77,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                             <select name="categoria_id" class="form-select" required>
                                 <option value="">Seleccione una categoría</option>
                                 <?php
-                                $categoriasCrear = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+                               $categoriasCrear = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
                                 while ($catCrear = $categoriasCrear->fetch_assoc()) {
                                 ?>
                                     <option value="<?php echo $catCrear['id']; ?>">
@@ -129,7 +129,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
             <select id="filtroCategoria" class="form-select">
                 <option value="">Todas las categorías</option>
                 <?php
-                $categoriasFiltro = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+               $categoriasFiltro = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
                 while ($catFiltro = $categoriasFiltro->fetch_assoc()) {
                 ?>
                     <option value="<?php echo strtolower($catFiltro['nombre']); ?>">
@@ -336,7 +336,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                                     <label class="form-label">Categoría</label>
                                     <select name="categoria_id" class="form-select" required>
                                         <?php
-                                        $categoriasModal = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+                                       $categoriasModal = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
                                         while ($catModal = $categoriasModal->fetch_assoc()) {
                                         ?>
                                             <option value="<?php echo $catModal['id']; ?>" <?php echo ($catModal['id'] == $p['categoria_id']) ? 'selected' : ''; ?>>
