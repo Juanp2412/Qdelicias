@@ -705,7 +705,7 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">Confirmar cobro</h5>
+                <h5 class="modal-title fw-bold">Confirmar cobro <span id="pagoMinimizadoTotal" class="pago-minimizado-total"></span></h5>
                 <button
                     type="button"
                     class="btn btn-sm btn-outline-secondary btn-min-pago"

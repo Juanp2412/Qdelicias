@@ -879,18 +879,23 @@ body {
   }
 
   .modal-checkout-right.is-minimized .modal-dialog {
-    width: min(300px, calc(100vw - 24px));
-    height: 58px;
-    min-height: 58px;
+    width: min(320px, calc(100vw - 24px));
+    height: 56px;
+    min-height: 56px;
     right: 12px;
-    bottom: 12px;
-    top: auto;
+    top: 12px;
+    bottom: auto;
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
   }
 
   .modal-checkout-right.is-minimized .modal-content {
-    min-height: 58px;
-    height: 58px;
+    min-height: 56px;
+    height: 56px;
     overflow: hidden;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: none;
   }
 
   .modal-checkout-right.is-minimized .modal-body,
@@ -899,7 +904,62 @@ body {
   }
 
   .modal-checkout-right.is-minimized .modal-header {
-    padding: 10px 12px;
+    padding: 0 12px;
+    height: 56px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 16px;
+    border: none;
+    background: transparent;
+    transition: opacity 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .modal-checkout-right.is-minimized .modal-header:hover {
+    opacity: 0.88;
+    background: transparent;
+  }
+
+  .modal-checkout-right.is-minimized .modal-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    flex: 1;
+  }
+
+  .modal-checkout-right.is-minimized .btn-min-pago {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .modal-checkout-right.is-minimized .btn-min-pago:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .modal-checkout-right.is-minimized .btn-close {
+    filter: invert(1);
+    opacity: 0.7;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    margin-left: 6px;
+  }
+
+  .pago-minimizado-total {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4ade80;
+    margin-left: 6px;
+    white-space: nowrap;
   }
 }
 
