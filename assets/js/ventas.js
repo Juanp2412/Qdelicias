@@ -891,17 +891,8 @@ function renderResumenPedido() {
             });
         }
 
-        const maxChipsVisibles = 6;
-        const estaExpandida = !!resumenConfigExpandida[index];
-        const chipsVisibles = estaExpandida ? chipsConfig : chipsConfig.slice(0, maxChipsVisibles);
-        const chipsOcultos = Math.max(chipsConfig.length - maxChipsVisibles, 0);
-
-        const botonExpandir = chipsOcultos > 0
-            ? `<button type="button" class="rc-more-btn" onclick="toggleResumenConfig(${index})">${estaExpandida ? 'Ver menos' : `+${chipsOcultos} mas`}</button>`
-            : '';
-
         const configRow = chipsConfig.length > 0
-            ? `<div class="rc-config">${chipsVisibles.join('')}${botonExpandir}</div>`
+            ? `<div class="rc-config">${chipsConfig.join('')}</div>`
             : '';
 
         const tipoCard = mostrarExtras ? 'extras' : (mostrarSabores ? 'sabores' : 'simple');

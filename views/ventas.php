@@ -692,6 +692,8 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
                     onclick="cerrarCheckout()"
                 ></button>
             </div>
+
+            <div class="modal-body p-0">
                 <div id="paymentDockTarget"></div>
             </div>
 
