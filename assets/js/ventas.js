@@ -30,6 +30,18 @@ extrasCatalogo.forEach(extra => {
     cantidadesExtras[extra.id] = 0;
 });
 
+// Enter para confirmar el modal de producto
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    const modal = document.getElementById('modalProducto');
+    if (!modal || !modal.classList.contains('show')) return;
+    // No disparar si el foco está en un input o textarea
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    e.preventDefault();
+    confirmarProductoSeleccionado();
+});
+
 function calcularExtrasAplicados(productoId, extrasSeleccionados) {
     const reglas = reglasProductos[productoId] || {};
     const usadosPorTipo = {};
@@ -157,10 +169,14 @@ function abrirModalEditarCarrito(index) {
     actualizarBotonConfirmarModal('Guardar cambios');
 
     if (tipo === 'sabores') {
+        const numSabores = (saboresPorProducto[item.id] || []).length;
+        ajustarTamanoModal(numSabores);
         renderSaboresEnModal(item.id);
     } else if (tipo === 'extras') {
+        ajustarTamanoModal(extrasCatalogo.length);
         renderExtrasEnModal(item.id);
     } else {
+        ajustarTamanoModal(0);
         document.getElementById('modalReglasProducto').innerHTML = '';
         document.getElementById('modalExtrasContenido').innerHTML =
             "<p class='text-muted mb-0'>Este producto no tiene extras o sabores para editar.</p>";
@@ -177,11 +193,47 @@ function abrirModalEditarCarrito(index) {
         new bootstrap.Modal(document.getElementById('modalProducto')).show();
     };
 
-    if (resumenAbierto && modalResumenPedidoInstance) {
+    const elPago = document.getElementById('modalPagoPedido');
+    const pagoAbierto = elPago && elPago.classList.contains('show');
+
+    if (pagoAbierto && modalPagoPedidoInstance) {
+        elPago.addEventListener('hidden.bs.modal', () => {
+            if (resumenAbierto && modalResumenPedidoInstance) {
+                elResumen.addEventListener('hidden.bs.modal', abrirProducto, { once: true });
+                modalResumenPedidoInstance.hide();
+            } else {
+                abrirProducto();
+            }
+        }, { once: true });
+        modalPagoPedidoInstance.hide();
+    } else if (resumenAbierto && modalResumenPedidoInstance) {
         elResumen.addEventListener('hidden.bs.modal', abrirProducto, { once: true });
         modalResumenPedidoInstance.hide();
     } else {
         abrirProducto();
+    }
+}
+
+/* ─── Tamaño dinámico del modal ──────────────────────────── */
+let _colClaseModal = 'col-12';
+
+function ajustarTamanoModal(numItems) {
+    const dialog = document.querySelector('#modalProducto .modal-dialog');
+    if (!dialog) return;
+    dialog.classList.remove('modal-sm', 'modal-md', 'modal-md-custom', 'modal-lg', 'modal-xl');
+
+    if (numItems <= 3) {
+        _colClaseModal = 'col-12';
+        // base ~460px
+    } else if (numItems <= 8) {
+        _colClaseModal = 'col-sm-6';
+        dialog.classList.add('modal-md-custom'); // ~640px
+    } else if (numItems <= 15) {
+        _colClaseModal = 'col-sm-6 col-lg-4';
+        dialog.classList.add('modal-lg'); // ~820px
+    } else {
+        _colClaseModal = 'col-sm-6 col-lg-4';
+        dialog.classList.add('modal-xl'); // ~1100px
     }
 }
 
@@ -206,10 +258,14 @@ function abrirModalProducto(id, nombre, precio, tipo) {
     actualizarSubtotalModal();
 
     if (tipo === 'sabores') {
+        const numSabores = (saboresPorProducto[id] || []).length;
+        ajustarTamanoModal(numSabores);
         renderSaboresEnModal(id);
     } else if (tipo === 'extras') {
+        ajustarTamanoModal(extrasCatalogo.length);
         renderExtrasEnModal(id);
     } else {
+        ajustarTamanoModal(0);
         document.getElementById('modalReglasProducto').innerHTML = '';
         document.getElementById('modalExtrasContenido').innerHTML =
             "<p class='text-muted'>Este producto no requiere configuración.</p>";
@@ -283,7 +339,7 @@ function renderExtrasEnModal(productoId) {
         extrasPorTipo[tipo].forEach(extra => {
             const cantidad = cantidadesExtras[extra.id] || 0;
             html += `
-                <div class="col-lg-4 col-md-6 col-12 modal-opcion-wrap" data-nombre="${(extra.nombre || '').toLowerCase()}">
+                <div class="${_colClaseModal} modal-opcion-wrap" data-nombre="${(extra.nombre || '').toLowerCase()}">
                     <div class="extra-item h-100">
                         <div>
                             <strong>${extra.nombre}</strong><br>
@@ -336,7 +392,7 @@ function renderSaboresEnModal(productoId) {
     sabores.forEach(sabor => {
         const cantidad = cantidadesSabores[sabor.id] || 0;
         html += `
-            <div class="col-lg-4 col-md-6 col-12 modal-opcion-wrap" data-nombre="${(sabor.nombre || '').toLowerCase()}">
+            <div class="${_colClaseModal} modal-opcion-wrap" data-nombre="${(sabor.nombre || '').toLowerCase()}">
                 <div class="extra-item h-100">
                     <strong>${sabor.nombre}</strong>
                     <div class="qty-controls">
@@ -375,6 +431,11 @@ function cambiarCantidadExtra(extraId, cambio) {
 }
 
 function establecerCantidadExtra(extraId, valor) {
+    if (valor === '' || valor === null) {
+        cantidadesExtras[extraId] = 0;
+        actualizarSubtotalModal();
+        return;
+    }
     let actual = parseInt(valor, 10);
     if (Number.isNaN(actual) || actual < 0) actual = 0;
     cantidadesExtras[extraId] = actual;
@@ -398,6 +459,11 @@ function cambiarCantidadSabor(saborId, cambio) {
 }
 
 function establecerCantidadSabor(saborId, valor) {
+    if (valor === '' || valor === null) {
+        cantidadesSabores[saborId] = 0;
+        actualizarSubtotalModal();
+        return;
+    }
     let actual = parseInt(valor, 10);
     if (Number.isNaN(actual) || actual < 0) actual = 0;
     cantidadesSabores[saborId] = actual;
@@ -514,7 +580,7 @@ function actualizarLineaCarritoDesdeModal() {
 
     const nuevaLinea = {
         ...lineaActual,
-        clave: generarClaveLinea(productoSeleccionado.id, calculoExtras.extrasAjustados),
+        clave: generarClaveLinea(productoSeleccionado.id, calculoExtras.extrasAjustados, saboresSeleccionados),
         precio_base: parseFloat(productoSeleccionado.precio) || 0,
         tipo_configuracion: productoSeleccionado.tipo || inferirTipoConfiguracion(lineaActual),
         extras: calculoExtras.extrasAjustados,
@@ -577,9 +643,10 @@ function limpiarSaboresSeleccionados() {
 }
 
 /* ─── Clave de línea del carrito ─────────────────────────── */
-function generarClaveLinea(productoId, extras) {
+function generarClaveLinea(productoId, extras, sabores = []) {
     const extrasClave = extras.map(e => `${e.id}:${e.cantidad}`).sort().join('|');
-    return productoId + '|' + extrasClave;
+    const saboresClave = sabores.map(s => `${s.id}:${s.cantidad}`).sort().join('|');
+    return productoId + '|' + extrasClave + '||' + saboresClave;
 }
 
 /* ─── Agregar producto con extras ────────────────────────── */
@@ -591,7 +658,7 @@ function agregarProductoConExtras(id, nombre, precio) {
 
     const calculoExtras = calcularExtrasAplicados(id, extrasSeleccionados);
     const precioUnitarioLinea = precio + calculoExtras.totalExtrasCobrados;
-    const clave = generarClaveLinea(id, calculoExtras.extrasAjustados);
+    const clave = generarClaveLinea(id, calculoExtras.extrasAjustados, saboresSeleccionados);
     const productoExistente = carrito.find(item => item.clave === clave);
 
     if (productoExistente) {
