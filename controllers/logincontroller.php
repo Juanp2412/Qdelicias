@@ -5,7 +5,10 @@ require_once "../config/conexion.php";
 $usuario = $_POST['usuario'];
 $password = $_POST['password'];
 
-$sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND contraseña = '$password'";
+$sql = "SELECT * FROM usuarios 
+        WHERE usuario='$usuario' 
+        AND contraseña='$password'
+        AND estado = 1";
 $resultado = $conn->query($sql);
 
 if ($resultado->num_rows > 0) {
