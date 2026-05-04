@@ -274,9 +274,15 @@ while ($e = $extras->fetch_assoc()) {
                     </div>
                 </div>
 
-                <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">
-                    Vaciar
-                </button>
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        onclick="abrirConfirmacionVenta()"
+                    >
+                        Abrir carrito grande
+                    </button>
+                </div>
 
             </div>
 
@@ -301,16 +307,43 @@ while ($e = $extras->fetch_assoc()) {
 
             </div>
 
+            <div class="cart-footer-sticky">
+
             <div class="total-box mb-2">
                 Total: $ <span id="total">0</span>
             </div>
 
+            <div id="paymentDock">
+
             <div class="payment-card mb-2">
 
-                <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="payment-card-head d-flex justify-content-between align-items-center mb-1">
                     <label class="form-label fw-bold mb-0">Pagos</label>
-                    <span class="section-help">Rápido o mixto</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="section-help">Rápido o mixto</span>
+                        <button
+                            type="button"
+                            id="btnTogglePagoPanel"
+                            class="btn btn-outline-secondary btn-sm payment-toggle-btn"
+                            onclick="togglePagoPanel()"
+                        >
+                            Ver pagos
+                        </button>
+                    </div>
                 </div>
+
+                <div id="paymentMiniSummary" class="payment-mini-summary mb-2">
+                    <div class="payment-mini-item">
+                        <span>Pagado</span>
+                        <strong id="mostrarTotalPagadoMini">$ 0</strong>
+                    </div>
+                    <div class="payment-mini-item">
+                        <span>Diferencia</span>
+                        <strong id="mostrarDiferenciaMini">$ 0</strong>
+                    </div>
+                </div>
+
+                <div id="paymentPanelBody" class="payment-panel-body d-none">
 
                 <div class="quick-pay-grid-top mb-2">
                     <button
@@ -463,6 +496,10 @@ while ($e = $extras->fetch_assoc()) {
                     </div>
                 </div>
 
+                </div>
+
+            </div>
+
             </div>
 
             <div class="acciones-finales">
@@ -470,11 +507,14 @@ while ($e = $extras->fetch_assoc()) {
                 <button
                     class="btn btn-success w-100"
                     id="btnGuardarVenta"
-                    onclick="guardarVenta()"
-                    disabled
+                    onclick="abrirConfirmacionVenta()"
                 >
-                    ✔ Guardar venta
+                    ✔ Verificar pedido
                 </button>
+
+            </div>
+
+            </div>
 
             </div>
 
@@ -495,7 +535,7 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
 
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
 
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-producto-dialog">
 
         <div class="modal-content">
 
@@ -567,11 +607,104 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
                 <button
                     type="button"
                     class="btn btn-success"
+                    id="btnConfirmarModalProducto"
                     onclick="confirmarProductoSeleccionado()"
                 >
                     Agregar al carrito
                 </button>
 
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade modal-checkout-left" id="modalResumenPedido" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-scrollable modal-resumen-dialog">
+
+        <div class="modal-content resumen-modal">
+
+            <div class="modal-header resumen-header">
+
+                <h5 class="modal-title fw-bold fs-5 mb-0">🧾 Confirmar pedido</h5>
+
+                <div class="resumen-header-actions">
+                    <div id="resumenLecturaHeader"></div>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        onclick="cerrarCheckout()"
+                    ></button>
+                </div>
+
+            </div>
+
+            <div class="modal-body">
+                <div id="resumenPedidoContenido"></div>
+            </div>
+
+            <div class="modal-footer justify-content-between">
+                <div class="resumen-total-modal">
+                    Total: <strong id="resumenPedidoTotal">$ 0</strong>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        onclick="vaciarCarrito()"
+                    >
+                        Vaciar carrito
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                    >
+                        Continuar venta
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade modal-checkout-right" id="modalPagoPedido" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-pago-side-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Confirmar cobro</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    onclick="cerrarCheckout()"
+                ></button>
+            </div>
+                <div id="paymentDockTarget"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-success w-100"
+                    id="btnConfirmarGuardarPago"
+                    onclick="guardarVenta('checkout')"
+                    disabled
+                >
+                    ✔ Confirmar y guardar
+                </button>
             </div>
 
         </div>
