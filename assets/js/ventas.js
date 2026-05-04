@@ -837,15 +837,34 @@ function abrirModalPagoPedido() {
 function aplicarEstadoPagoMinimizado() {
     const modalPagoEl = document.getElementById('modalPagoPedido');
     const btnMin = document.getElementById('btnMinimizarPagoCheckout');
+    const totalEl = document.getElementById('pagoMinimizadoTotal');
     if (!modalPagoEl) return;
 
     modalPagoEl.classList.toggle('is-minimized', pagoCheckoutMinimizado);
 
     if (btnMin) {
-        btnMin.innerText = pagoCheckoutMinimizado ? '+' : '-';
+        btnMin.innerText = pagoCheckoutMinimizado ? '▲' : '−';
         btnMin.setAttribute('aria-pressed', pagoCheckoutMinimizado ? 'true' : 'false');
         btnMin.setAttribute('title', pagoCheckoutMinimizado ? 'Expandir cobro' : 'Minimizar cobro');
     }
+
+    if (totalEl) {
+        totalEl.textContent = pagoCheckoutMinimizado ? `Total: $ ${formatearPeso(total)}` : '';
+    }
+
+    const header = modalPagoEl.querySelector('.modal-header');
+    if (header) {
+        if (pagoCheckoutMinimizado) {
+            header.addEventListener('click', _onHeaderMinimizadoClick);
+        } else {
+            header.removeEventListener('click', _onHeaderMinimizadoClick);
+        }
+    }
+}
+
+function _onHeaderMinimizadoClick(e) {
+    if (e.target.closest('.btn-close') || e.target.closest('.btn-min-pago')) return;
+    toggleMinimizarPagoCheckout(false);
 }
 
 function toggleMinimizarPagoCheckout(forzarEstado) {
