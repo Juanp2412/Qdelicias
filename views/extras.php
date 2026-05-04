@@ -6,10 +6,10 @@ require_once "../config/auth.php";
 soloAdmin();
 
 $extras = $conn->query("SELECT * FROM extras ORDER BY id DESC");
-$tiposExtras = $conn->query("SELECT * FROM tipos_extra ORDER BY nombre ASC");
+$tiposExtras = $conn->query("SELECT * FROM tipos_extra WHERE estado = 1 ORDER BY nombre ASC");
 
 $tiposArray = [];
-$tiposConsulta = $conn->query("SELECT * FROM tipos_extra ORDER BY nombre ASC");
+$tiposConsulta = $conn->query("SELECT * FROM tipos_extra WHERE estado = 1 ORDER BY nombre ASC");
 while ($tipo = $tiposConsulta->fetch_assoc()) {
     $tiposArray[] = $tipo['nombre'];
 }
@@ -21,50 +21,45 @@ while ($tipo = $tiposConsulta->fetch_assoc()) {
     <meta charset="UTF-8">
     <title>Extras</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+   
+    <style>
+            body {
+                background: #f5f6f8;
+  
+            }
+
+            .main-content {
+                margin-left: 225px;
+                padding: 32px 24px;
+                padding-top: 80px;
+                min-height: 100vh;
+            }
+        </style>
 </head>
 
 <body class="bg-light">
 
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
 
-<div class="container mt-4">
+<div style="margin-left:250px; padding:86px 20px 20px 20px;">
 
-    <h3>Gestión de Extras</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-0">Extras</h3>
+            <small class="text-muted">Administra toppings, salsas, bases y adicionales</small>
+        </div>
 
-    <!-- FORMULARIO CREAR -->
-    <div class="card p-3 mb-3">
-        <form action="../controllers/extraController.php" method="POST">
-            <input type="hidden" name="accion" value="crear">
-
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" name="nombre" class="form-control" placeholder="Nombre del extra" required>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Precio</label>
-                    <input type="number" name="precio" class="form-control" placeholder="Precio" required>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Tipo</label>
-                    <select name="tipo" class="form-select" required>
-                        <option value="">Seleccione tipo</option>
-                        <?php while($tipo = $tiposExtras->fetch_assoc()) { ?>
-                            <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
-                                <?php echo ucfirst(htmlspecialchars($tipo['nombre'])); ?>
-                            </option>
-                        <?php } ?>
-                    </select>
-                </div>
-
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-success w-100">Guardar extra</button>
-                </div>
-            </div>
-        </form>
+        <button 
+            class="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#modalCrearExtra"
+        >
+            + Nuevo extra
+        </button>
     </div>
+
+    
 
     <!-- BUSCADOR Y FILTROS -->
     <div class="card p-3 mb-3">
@@ -105,7 +100,8 @@ while ($tipo = $tiposConsulta->fetch_assoc()) {
                 <th>Nombre</th>
                 <th>Tipo</th>
                 <th>Precio</th>
-                <th width="220">Acciones</th>
+                <th>Estado</th>
+                <th width="300">Acciones</th>
             </tr>
         </thead>
 
@@ -127,22 +123,51 @@ while ($tipo = $tiposConsulta->fetch_assoc()) {
                 </td>
 
                 <td>$ <?php echo number_format($e['precio'], 0, ',', '.'); ?></td>
-
                 <td>
-                    <button 
-                        type="button"
-                        class="btn btn-warning btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalEditarExtra<?php echo $e['id']; ?>"
-                    >
-                        Editar
-                    </button>
+                    <?php if ($e['estado'] == 1) { ?>
+                        <span class="badge bg-success">Activo</span>
+                    <?php } else { ?>
+                        <span class="badge bg-secondary">Inactivo</span>
+                    <?php } ?>
+                </td>
+                <td>
+                    <div class="d-flex gap-2 flex-wrap">
 
-                    <form action="../controllers/extraController.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="accion" value="eliminar">
-                        <input type="hidden" name="id" value="<?php echo $e['id']; ?>">
-                        <button class="btn btn-danger btn-sm">X</button>
-                    </form>
+                        <button 
+                            type="button"
+                            class="btn btn-sm btn-outline-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEditarExtra<?php echo $e['id']; ?>"
+                        >
+                            Editar
+                        </button>
+
+                        <?php if ($e['estado'] == 1) { ?>
+                            <a 
+                                href="../controllers/extraController.php?accion=desactivar&id=<?php echo $e['id']; ?>" 
+                                class="btn btn-sm btn-outline-secondary"
+                            >
+                                Desactivar
+                            </a>
+                        <?php } else { ?>
+                            <a 
+                                href="../controllers/extraController.php?accion=activar&id=<?php echo $e['id']; ?>" 
+                                class="btn btn-sm btn-outline-success"
+                            >
+                                Activar
+                            </a>
+                        <?php } ?>
+
+                        <button 
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEliminarExtra<?php echo $e['id']; ?>"
+                        >
+                            Eliminar
+                        </button>
+
+                    </div>
                 </td>
             </tr>
 
@@ -214,12 +239,96 @@ while ($tipo = $tiposConsulta->fetch_assoc()) {
                 </div>
             </div>
 
+            <!-- MODAL ELIMINAR EXTRA -->
+            <div class="modal fade" id="modalEliminarExtra<?php echo $e['id']; ?>" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Eliminar extra</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p class="mb-1">¿Seguro que deseas eliminar este extra?</p>
+                            <strong><?php echo htmlspecialchars($e['nombre']); ?></strong>
+
+                            <div class="alert alert-warning mt-3 mb-0">
+                                Si este extra ya fue usado en ventas o reglas de productos, eliminarlo puede romper el historial.
+                                Lo recomendado es <strong>desactivarlo</strong>.
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+
+                            <a 
+                                href="../controllers/extraController.php?accion=eliminar&id=<?php echo $e['id']; ?>" 
+                                class="btn btn-danger"
+                            >
+                                Sí, eliminar
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         <?php } ?>
         </tbody>
     </table>
 
     <a href="dashboard.php" class="btn btn-secondary">Volver</a>
 
+</div>
+<!-- MODAL CREAR EXTRA -->
+<div class="modal fade" id="modalCrearExtra" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form action="../controllers/extraController.php" method="POST">
+                <input type="hidden" name="accion" value="crear">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo extra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Precio</label>
+                        <input type="number" name="precio" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select name="tipo" class="form-select" required>
+                            <option value="">Seleccione</option>
+                            <?php foreach($tiposArray as $tipoNombre) { ?>
+                                <option value="<?php echo htmlspecialchars($tipoNombre); ?>">
+                                    <?php echo ucfirst(htmlspecialchars($tipoNombre)); ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar extra</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </div>
 
 <script>

@@ -1,11 +1,20 @@
 <?php
 require_once "../config/conexion.php";
 
-$accion = $_POST['accion'];
+$accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
 if ($accion == "crear") {
     $nombre = trim($_POST['nombre']);
     $conn->query("INSERT INTO tipos_extra (nombre) VALUES ('$nombre')");
+}
+if ($accion == "desactivar") {
+    $id = $_GET['id'] ?? $_POST['id'] ?? 0;
+    $conn->query("UPDATE tipos_extra SET estado = 0 WHERE id = $id");
+}
+
+if ($accion == "activar") {
+    $id = $_GET['id'] ?? $_POST['id'] ?? 0;
+    $conn->query("UPDATE tipos_extra SET estado = 1 WHERE id = $id");
 }
 
 if ($accion == "editar") {
@@ -22,7 +31,7 @@ if ($accion == "editar") {
 }
 
 if ($accion == "eliminar") {
-    $id = (int) $_POST['id'];
+    $id = (int) ($_GET['id'] ?? $_POST['id'] ?? 0);
 
     $nombreTipo = $conn->query("SELECT nombre FROM tipos_extra WHERE id = $id");
     $filaTipo = $nombreTipo->fetch_assoc();
