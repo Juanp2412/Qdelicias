@@ -535,7 +535,7 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
 
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
 
-    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-producto-dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-producto-dialog">
 
         <div class="modal-content">
 
@@ -558,37 +558,33 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
 
                 <div class="modal-product-header mb-3">
 
-                    <h4 id="modalProductoNombre" class="mb-1 fw-bold"></h4>
+                    <div class="modal-product-header-left">
+                        <h4 id="modalProductoNombre" class="mb-1 fw-bold"></h4>
+                        <p class="text-muted mb-0">
+                            Precio base:
+                            <strong id="modalProductoPrecio"></strong>
+                        </p>
+                    </div>
 
-                    <p class="text-muted mb-0">
-                        Precio base:
-                        <strong id="modalProductoPrecio"></strong>
-                    </p>
+                    <div class="modal-product-header-right">
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted">Precio base:</span>
+                            <strong id="modalPrecioBase">$ 0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted">Extras cobrados:</span>
+                            <strong id="modalExtrasCobrados">$ 0</strong>
+                        </div>
+                        <hr class="my-1">
+                        <div class="d-flex justify-content-between gap-3 fs-6">
+                            <span class="fw-bold">Total:</span>
+                            <strong id="modalTotalProducto" class="text-success">$ 0</strong>
+                        </div>
+                    </div>
 
                 </div>
 
                 <div id="modalReglasProducto" class="mb-3"></div>
-
-                <div class="payment-summary mb-3">
-
-                    <div class="d-flex justify-content-between">
-                        <span>Precio base:</span>
-                        <strong id="modalPrecioBase">$ 0</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-                        <span>Extras cobrados:</span>
-                        <strong id="modalExtrasCobrados">$ 0</strong>
-                    </div>
-
-                    <hr class="my-2">
-
-                    <div class="d-flex justify-content-between fs-5">
-                        <span>Total producto:</span>
-                        <strong id="modalTotalProducto">$ 0</strong>
-                    </div>
-
-                </div>
 
                 <div id="modalExtrasContenido"></div>
 
