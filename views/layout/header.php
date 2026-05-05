@@ -9,6 +9,7 @@ $rol = $_SESSION['rol'] ?? 'vendedor';
 ?>
 
 <link rel="stylesheet" href="/Qdelicias/assets/css/app.css">
+<script src="/Qdelicias/assets/js/app.js"></script>
 
 <div class="topbar">
 

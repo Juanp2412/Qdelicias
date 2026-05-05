@@ -173,7 +173,7 @@ while ($tipo = $tiposConsulta->fetch_assoc()) {
 
             <!-- MODAL EDITAR EXTRA -->
             <div class="modal fade" id="modalEditarExtra<?php echo $e['id']; ?>" tabindex="-1">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
 
                         <form action="../controllers/extraController.php" method="POST">

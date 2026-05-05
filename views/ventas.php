@@ -742,5 +742,6 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
 
 </div>
 
+<script src="../assets/js/app.js"></script>
 </body>
 </html>

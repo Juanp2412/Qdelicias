@@ -48,7 +48,7 @@ $categorias = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY n
 
    <!-- MODAL CREAR PRODUCTO -->
 <div class="modal fade" id="modalCrearProducto" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
 
             <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">
@@ -308,7 +308,7 @@ $categorias = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY n
 
             <!-- MODAL EDITAR -->
             <div class="modal fade" id="modalEditar<?php echo $p['id']; ?>" tabindex="-1">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
 
                         <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">

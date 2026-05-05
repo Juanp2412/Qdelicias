@@ -121,7 +121,7 @@ $tipos = $conn->query("SELECT * FROM tipos_extra ORDER BY id DESC");
 
 <!-- MODAL EDITAR -->
 <div class="modal fade" id="modalTipo<?php echo $t['id']; ?>" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
 
       <form action="../controllers/tipoExtraController.php" method="POST">

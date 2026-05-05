@@ -165,7 +165,7 @@ $reglas = $conn->query("
 
                     <!-- MODAL EDITAR -->
                     <div class="modal fade" id="modalRegla<?php echo $r['id']; ?>" tabindex="-1">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
 
                                 <form action="../controllers/reglaProductoController.php" method="POST">

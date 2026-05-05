@@ -1,241 +1,252 @@
 body {
-    background: #f5f7fb;
-    font-family: 'Segoe UI', sans-serif;
+  background: #f5f7fb;
+  font-family: "Segoe UI", sans-serif;
 }
 
 .main-content {
-    margin-left: 240px;
-    padding: 80px 24px 24px 24px;
-    min-height: 100vh;
+  margin-left: 240px;
+  padding: 80px 24px 24px 24px;
+  min-height: 100vh;
 }
 
 /* HEADER */
 .topbar {
-    height: 60px;
-    position: fixed;
-    top: 0;
-    left: 240px;
-    right: 0;
-    background: rgba(17,24,39,0.96);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    z-index: 1000;
+  height: 60px;
+  position: fixed;
+  top: 0;
+  left: 240px;
+  right: 0;
+  background: rgba(17, 24, 39, 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
+  z-index: 1000;
 }
 
 .brand {
-    font-weight: 800;
-    color: #14b8a6;
-    font-size: 20px;
+  font-weight: 800;
+  color: #14b8a6;
+  font-size: 20px;
 }
 
 .user-box {
-    text-align: right;
+  text-align: right;
 }
 
 .user-box .name {
-    color: white;
-    font-size: 13px;
-    font-weight: 600;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .user-box .role {
-    font-size: 11px;
-    color: #9ca3af;
+  font-size: 11px;
+  color: #9ca3af;
 }
 
 .btn-custom {
-    border-radius: 10px;
-    font-size: 13px;
-    padding: 6px 12px;
-    text-decoration: none;
-    transition: .2s;
+  border-radius: 10px;
+  font-size: 13px;
+  padding: 6px 12px;
+  text-decoration: none;
+  transition: 0.2s;
 }
 
 .btn-custom:hover {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .btn-dashboard {
-    background: #1f2937;
-    color: white;
+  background: #1f2937;
+  color: white;
 }
 
 .btn-ventas {
-    background: #14b8a6;
-    color: white;
+  background: #14b8a6;
+  color: white;
 }
 
 .btn-logout {
-    background: #ef4444;
-    color: white;
+  background: #ef4444;
+  color: white;
 }
 
 /* SIDEBAR */
 .sidebar {
-    width: 240px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    background: #111827;
-    padding: 20px 15px;
-    color: white;
-    z-index: 1100;
+  width: 240px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  background: #111827;
+  padding: 20px 15px;
+  color: white;
+  z-index: 1040;
 }
 
 .sidebar-logo {
-    font-size: 22px;
-    font-weight: 800;
-    color: #14b8a6;
-    margin-bottom: 25px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #14b8a6;
+  margin-bottom: 25px;
 }
 
 .sidebar a {
-    display: block;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: #d1d5db;
-    text-decoration: none;
-    font-size: 14px;
-    margin-bottom: 6px;
-    transition: 0.2s;
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 6px;
+  transition: 0.2s;
 }
 
 .sidebar a:hover {
-    background: #1f2937;
-    color: white;
-    transform: translateX(4px);
+  background: #1f2937;
+  color: white;
+  transform: translateX(4px);
 }
 
 .sidebar a.active {
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
-    color: white;
-    font-weight: 700;
-    box-shadow: 0 8px 18px rgba(20,184,166,.25);
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(20, 184, 166, 0.25);
 }
 
 .sidebar .section {
-    font-size: 12px;
-    color: #6b7280;
-    margin: 15px 0 10px;
-    padding-left: 5px;
-    text-transform: uppercase;
+  font-size: 12px;
+  color: #6b7280;
+  margin: 15px 0 10px;
+  padding-left: 5px;
+  text-transform: uppercase;
 }
 
 .sidebar .logout {
-    color: #f87171;
+  color: #f87171;
 }
 
 .sidebar .logout:hover {
-    background: rgba(239,68,68,0.15);
+  background: rgba(239, 68, 68, 0.15);
 }
 /* TABLAS MODERNAS */
 .table {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 .table thead {
-    background: #111827;
-    color: white;
-    font-size: 13px;
+  background: #111827;
+  color: white;
+  font-size: 13px;
 }
 
 .table th {
-    border: none;
-    padding: 14px;
+  border: none;
+  padding: 14px;
 }
 
 .table td {
-    vertical-align: middle;
-    padding: 12px;
-    border-color: #f1f5f9;
+  vertical-align: middle;
+  padding: 12px;
+  border-color: #f1f5f9;
 }
 
 /* EFECTO HOVER */
 .table tbody tr:hover {
-    background: #f9fafb;
-    transition: 0.2s;
+  background: #f9fafb;
+  transition: 0.2s;
 }
 
 /* BOTONES SISTEMA */
 .btn-system {
-    border-radius: 8px;
-    font-size: 12px;
-    padding: 5px 10px;
-    font-weight: 600;
-    border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  padding: 5px 10px;
+  font-weight: 600;
+  border: none;
 }
 
 /* EDITAR */
 .btn-edit {
-    background: #f59e0b;
-    color: white;
+  background: #f59e0b;
+  color: white;
 }
 
 /* VER / DETALLE */
 .btn-info-custom {
-    background: #3b82f6;
-    color: white;
+  background: #3b82f6;
+  color: white;
 }
 
 /* DESACTIVAR */
 .btn-disable {
-    background: #6b7280;
-    color: white;
+  background: #6b7280;
+  color: white;
 }
 
 /* ELIMINAR */
 .btn-delete {
-    background: #ef4444;
-    color: white;
+  background: #ef4444;
+  color: white;
 }
 
 /* HOVER */
 .btn-system:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .badge-custom {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* TIPOS */
 .badge-blue {
-    background: #3b82f6;
-    color: white;
+  background: #3b82f6;
+  color: white;
 }
 
 .badge-green {
-    background: #10b981;
-    color: white;
+  background: #10b981;
+  color: white;
 }
 
 .badge-purple {
-    background: #8b5cf6;
-    color: white;
+  background: #8b5cf6;
+  color: white;
 }
 
 .badge-yellow {
-    background: #f59e0b;
-    color: white;
+  background: #f59e0b;
+  color: white;
 }
 
 .btn-success-custom {
-    background: #059669;
-    color: white;
+  background: #059669;
+  color: white;
 }
 .badge-gray {
-    background: #6b7280;
-    color: white;
+  background: #6b7280;
+  color: white;
+}
+
+/* MODALES — centrado vertical en todas las pantallas */
+.modal-dialog-centered {
+  min-height: calc(100% - 1rem) !important;
+}
+
+@media (min-width: 576px) {
+  .modal-dialog-centered {
+    min-height: calc(100% - 3.5rem) !important;
+  }
 }

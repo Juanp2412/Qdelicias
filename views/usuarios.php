@@ -126,7 +126,7 @@ $usuarios = $conn->query("SELECT * FROM usuarios ORDER BY id DESC");
             </tr>
 
             <div class="modal fade" id="modalUsuario<?php echo $u['id']; ?>" tabindex="-1">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
 
                         <form action="../controllers/usuarioController.php" method="POST">
