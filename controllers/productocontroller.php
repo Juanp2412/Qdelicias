@@ -1,7 +1,7 @@
 <?php
 require_once "../config/conexion.php";
 
-$accion = $_POST['accion'] ?? '';
+$accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
 if ($accion == "crear") {
 
@@ -81,9 +81,22 @@ if ($accion == "editar") {
 
 if ($accion == "eliminar") {
 
-    $id = $_POST['id'];
+    $id = $_GET['id'] ?? $_POST['id'] ?? 0;
 
     $conn->query("DELETE FROM productos WHERE id=$id");
 }
 
+if ($accion == "desactivar") {
+
+    $id = $_GET['id'] ?? $_POST['id'] ?? 0;
+
+    $conn->query("UPDATE productos SET estado = 0 WHERE id=$id");
+}
+
+if ($accion == "activar") {
+
+    $id = $_GET['id'] ?? $_POST['id'] ?? 0;
+
+    $conn->query("UPDATE productos SET estado = 1 WHERE id=$id");
+}
 header("Location: ../views/productos.php");

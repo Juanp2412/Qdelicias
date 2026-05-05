@@ -13,32 +13,45 @@ $tipos = $conn->query("SELECT * FROM tipos_extra ORDER BY id DESC");
 <head>
     <title>Tipos de Extra</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+    body {
+        background: #f5f6f8;
+        
+    }
+
+    .main-content {
+        margin-left: 225px;
+        padding: 32px 24px;
+        padding-top: 80px;
+        min-height: 100vh;
+    }
+</style>
+
 </head>
 
 <body class="bg-light">
 
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
 
-<div class="container mt-4">
+<div class="main-content">
 
-<h3>Tipos de Extra</h3>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="mb-0">Tipos de extra</h3>
+        <small class="text-muted">Organiza toppings, salsas, bases y adicionales</small>
+    </div>
 
-<!-- CREAR -->
-<div class="card p-3 mb-4">
-    <form action="../controllers/tipoExtraController.php" method="POST">
-        <input type="hidden" name="accion" value="crear">
-
-        <div class="row g-2">
-            <div class="col-md-8">
-                <input type="text" name="nombre" class="form-control" placeholder="Nombre del tipo" required>
-            </div>
-
-            <div class="col-md-4">
-                <button class="btn btn-success w-100">Guardar</button>
-            </div>
-        </div>
-    </form>
+    <button 
+        class="btn btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#modalCrearTipo"
+    >
+        + Nuevo tipo
+    </button>
 </div>
+
 
 <!-- TABLA -->
 <table class="table table-bordered align-middle">
@@ -46,7 +59,8 @@ $tipos = $conn->query("SELECT * FROM tipos_extra ORDER BY id DESC");
 <tr>
 <th>ID</th>
 <th>Nombre</th>
-<th width="220">Acciones</th>
+<th>Estado</th>
+<th width="300">Acciones</th>
 </tr>
 </thead>
 
@@ -56,35 +70,58 @@ $tipos = $conn->query("SELECT * FROM tipos_extra ORDER BY id DESC");
 <tr>
 <td><?php echo $t['id']; ?></td>
 
+<td><?php echo ucfirst(htmlspecialchars($t['nombre'])); ?></td>
 <td>
-    <span class="badge bg-primary fs-6">
-        <?php echo ucfirst($t['nombre']); ?>
-    </span>
+    <?php if ($t['estado'] == 1) { ?>
+        <span class="badge bg-success">Activo</span>
+    <?php } else { ?>
+        <span class="badge bg-secondary">Inactivo</span>
+    <?php } ?>
 </td>
-
 <td>
-    <!-- EDITAR -->
-    <button 
-        type="button"
-        class="btn btn-warning btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#modalTipo<?php echo $t['id']; ?>"
-    >
-        Editar
-    </button>
+    <div class="d-flex gap-2 flex-wrap">
 
-    <!-- ELIMINAR -->
-    <form action="../controllers/tipoExtraController.php" method="POST" style="display:inline;">
-        <input type="hidden" name="accion" value="eliminar">
-        <input type="hidden" name="id" value="<?php echo $t['id']; ?>">
-        <button class="btn btn-danger btn-sm">X</button>
-    </form>
+        <button 
+            type="button"
+            class="btn btn-sm btn-outline-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#modalTipo<?php echo $t['id']; ?>"
+        >
+            Editar
+        </button>
+
+        <?php if ($t['estado'] == 1) { ?>
+            <a 
+                href="../controllers/tipoExtraController.php?accion=desactivar&id=<?php echo $t['id']; ?>" 
+                class="btn btn-sm btn-outline-secondary"
+            >
+                Desactivar
+            </a>
+        <?php } else { ?>
+            <a 
+                href="../controllers/tipoExtraController.php?accion=activar&id=<?php echo $t['id']; ?>" 
+                class="btn btn-sm btn-outline-success"
+            >
+                Activar
+            </a>
+        <?php } ?>
+
+        <button 
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#modalEliminarTipo<?php echo $t['id']; ?>"
+        >
+            Eliminar
+        </button>
+
+    </div>
 </td>
 </tr>
 
 <!-- MODAL EDITAR -->
 <div class="modal fade" id="modalTipo<?php echo $t['id']; ?>" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
 
       <form action="../controllers/tipoExtraController.php" method="POST">
@@ -126,6 +163,43 @@ $tipos = $conn->query("SELECT * FROM tipos_extra ORDER BY id DESC");
   </div>
 </div>
 
+<!-- MODAL ELIMINAR TIPO -->
+<div class="modal fade" id="modalEliminarTipo<?php echo $t['id']; ?>" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Eliminar tipo de extra</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-1">¿Seguro que deseas eliminar este tipo?</p>
+                <strong><?php echo htmlspecialchars($t['nombre']); ?></strong>
+
+                <div class="alert alert-warning mt-3 mb-0">
+                    Si este tipo tiene extras o reglas asociadas, eliminarlo puede causar errores.
+                    Lo recomendado es <strong>desactivarlo</strong>.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <a 
+                    href="../controllers/tipoExtraController.php?accion=eliminar&id=<?php echo $t['id']; ?>" 
+                    class="btn btn-danger"
+                >
+                    Sí, eliminar
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <?php } ?>
 
 </tbody>
@@ -134,7 +208,39 @@ $tipos = $conn->query("SELECT * FROM tipos_extra ORDER BY id DESC");
 <a href="dashboard.php" class="btn btn-secondary">Volver</a>
 
 </div>
+<!-- MODAL CREAR TIPO -->
+<div class="modal fade" id="modalCrearTipo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
 
+            <form action="../controllers/tipoExtraController.php" method="POST">
+                <input type="hidden" name="accion" value="crear">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo tipo de extra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label class="form-label">Nombre</label>
+                    <input 
+                        type="text" 
+                        name="nombre" 
+                        class="form-control" 
+                        placeholder="Ej: toppings, salsas, bases..." 
+                        required
+                    >
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar tipo</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

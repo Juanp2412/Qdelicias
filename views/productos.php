@@ -12,7 +12,7 @@ $productos = $conn->query("
     ORDER BY p.id DESC
 ");
 
-$categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+$categorias = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
 ?>
 
 <!DOCTYPE html>
@@ -25,60 +25,96 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
 
 <body class="bg-light">
 
-<div class="container mt-4">
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
 
-    <h3>Gestión de Productos</h3>
+<div class="main-content">
 
-    <!-- FORMULARIO CREAR -->
-    <div class="card p-3 mb-4">
-        <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="accion" value="crear">
-
-            <div class="row g-2">
-                <div class="col-md-3">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" name="nombre" class="form-control" placeholder="Nombre del producto" required>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Precio</label>
-                    <input type="number" name="precio" class="form-control" placeholder="Precio" required>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Categoría</label>
-                    <select name="categoria_id" class="form-select" required>
-                        <option value="">Seleccione</option>
-                        <?php while ($cat = $categorias->fetch_assoc()) { ?>
-                            <option value="<?php echo $cat['id']; ?>">
-                                <?php echo $cat['nombre']; ?>
-                            </option>
-                        <?php } ?>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">Tipo</label>
-                    <select name="tipo_configuracion" class="form-select" required>
-                        <option value="simple">Simple</option>
-                        <option value="extras">Extras</option>
-                        <option value="sabores">Sabores</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Imagen</label>
-                    <input type="file" name="imagen" class="form-control" accept="image/*">
-                </div>
-
-                <div class="col-md-2 mt-3">
-                    <button class="btn btn-success w-100">Guardar</button>
-                </div>
-            </div>
-        </form>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="mb-0">Productos</h3>
+        <small class="text-muted">Administra el catálogo del negocio</small>
     </div>
-    <div class="card p-3 mb-3">
+
+    <button 
+        class="btn btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#modalCrearProducto"
+    >
+        + Nuevo producto
+    </button>
+</div>
+
+
+   <!-- MODAL CREAR PRODUCTO -->
+<div class="modal fade" id="modalCrearProducto" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="accion" value="crear">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Alas familiares" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Precio</label>
+                            <input type="number" name="precio" class="form-control" placeholder="Ej: 58000" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Categoría</label>
+                            <select name="categoria_id" class="form-select" required>
+                                <option value="">Seleccione una categoría</option>
+                                <?php
+                               $categoriasCrear = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
+                                while ($catCrear = $categoriasCrear->fetch_assoc()) {
+                                ?>
+                                    <option value="<?php echo $catCrear['id']; ?>">
+                                        <?php echo $catCrear['nombre']; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de producto</label>
+                            <select name="tipo_configuracion" class="form-select" required>
+                                <option value="simple">Simple</option>
+                                <option value="extras">Con extras</option>
+                                <option value="sabores">Con sabores</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Imagen</label>
+                            <input type="file" name="imagen" class="form-control" accept="image/*">
+                            <small class="text-muted">Recomendado: imagen cuadrada o rectangular horizontal.</small>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar producto</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+    <div class="card border-0 shadow-sm p-3 mb-3">
     <div class="row g-2">
         <div class="col-md-5">
             <input 
@@ -93,7 +129,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
             <select id="filtroCategoria" class="form-select">
                 <option value="">Todas las categorías</option>
                 <?php
-                $categoriasFiltro = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+               $categoriasFiltro = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
                 while ($catFiltro = $categoriasFiltro->fetch_assoc()) {
                 ?>
                     <option value="<?php echo strtolower($catFiltro['nombre']); ?>">
@@ -116,7 +152,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
     
 
     <!-- TABLA -->
-    <table class="table table-bordered align-middle">
+    <table class="table table-hover table-bordered align-middle bg-white shadow-sm">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
@@ -125,7 +161,8 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                 <th>Precio</th>
                 <th>Categoría</th>
                 <th>Tipo</th>
-                <th width="260">Acciones</th>
+                <th>Estado</th>
+                <th width="310">Acciones</th>
             </tr>
         </thead>
 
@@ -151,33 +188,127 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                 <td>$ <?php echo number_format($p['precio'], 0, ',', '.'); ?></td>
                 <td><?php echo $p['categoria'] ?? 'Sin categoría'; ?></td>
                 <td><?php echo $p['tipo_configuracion']; ?></td>
+                <td>
+                    <?php if ($p['estado'] == 1) { ?>
+                        <span class="badge bg-success">Activo</span>
+                    <?php } else { ?>
+                        <span class="badge bg-secondary">Inactivo</span>
+                    <?php } ?>
+                </td>
 
                 <td>
-                    <button 
-                        type="button"
-                        class="btn btn-warning btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalEditar<?php echo $p['id']; ?>"
-                    >
-                        Editar
-                    </button>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button 
+                            class="btn btn-sm btn-outline-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEditar<?php echo $p['id']; ?>"
+                        >
+                            Editar
+                        </button>
 
-                    <a href="producto_sabores.php?producto_id=<?php echo $p['id']; ?>" class="btn btn-info btn-sm">
-                        Sabores
-                    </a>
+                            <?php if ($p['tipo_configuracion'] == 'sabores') { ?>
 
-                    <form action="../controllers/productoController.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="accion" value="eliminar">
-                        <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
+                                <a 
+                                    href="producto_sabores.php?id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-info"
+                                >
+                                    Sabores
+                                </a>
 
-                        <button class="btn btn-danger btn-sm">X</button>
-                    </form>
+                            <?php } elseif ($p['tipo_configuracion'] == 'extras') { ?>
+
+                                <a 
+                                    href="reglas_producto.php?producto_id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Reglas extras
+                                </a>
+
+                            <?php } ?>
+                        <?php if ($p['estado'] == 1) { ?>
+                            <a 
+                                href="../controllers/productoController.php?accion=desactivar&id=<?php echo $p['id']; ?>" 
+                                class="btn btn-sm btn-outline-secondary"
+                            >
+                                Desactivar
+                            </a>
+                        <?php } else { ?>
+                            <a 
+                                href="../controllers/productoController.php?accion=activar&id=<?php echo $p['id']; ?>" 
+                                class="btn btn-sm btn-outline-success"
+                            >
+                                Activar
+                            </a>
+                        <?php } ?>
+
+                        <button 
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEliminar<?php echo $p['id']; ?>"
+                        >
+                            Eliminar
+                        </button>
+                    </div>
                 </td>
             </tr>
+            <!-- MODAL CONFIRMAR ELIMINAR -->
+            <div class="modal fade" id="modalEliminar<?php echo $p['id']; ?>" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Eliminar producto</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p class="mb-1">¿Seguro que deseas eliminar este producto?</p>
+                            <strong><?php echo htmlspecialchars($p['nombre']); ?></strong>
+
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <strong>Advertencia:</strong> si este producto ya fue vendido o está relacionado con extras, sabores o reportes, eliminarlo puede romper el historial del sistema.
+                            <br>
+                            Lo recomendado es usar <strong>Desactivar</strong> para que no aparezca en ventas, pero siga disponible en reportes.
+                        </div>
+                        </div>
+                        
+
+                        <div class="modal-footer">
+                            <?php if ($p['estado'] == 1) { ?>
+                                <a 
+                                    href="../controllers/productoController.php?accion=desactivar&id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-secondary"
+                                >
+                                    Desactivar
+                                </a>
+                            <?php } else { ?>
+                                <a 
+                                    href="../controllers/productoController.php?accion=activar&id=<?php echo $p['id']; ?>" 
+                                    class="btn btn-sm btn-outline-success"
+                                >
+                                    Activar
+                                </a>
+                            <?php } ?>
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+
+                            <a 
+                                href="../controllers/productoController.php?accion=eliminar&id=<?php echo $p['id']; ?>" 
+                                class="btn btn-danger"
+                            >
+                                Sí, eliminar
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
 
             <!-- MODAL EDITAR -->
             <div class="modal fade" id="modalEditar<?php echo $p['id']; ?>" tabindex="-1">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
 
                         <form action="../controllers/productoController.php" method="POST" enctype="multipart/form-data">
@@ -205,7 +336,7 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
                                     <label class="form-label">Categoría</label>
                                     <select name="categoria_id" class="form-select" required>
                                         <?php
-                                        $categoriasModal = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+                                       $categoriasModal = $conn->query("SELECT * FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
                                         while ($catModal = $categoriasModal->fetch_assoc()) {
                                         ?>
                                             <option value="<?php echo $catModal['id']; ?>" <?php echo ($catModal['id'] == $p['categoria_id']) ? 'selected' : ''; ?>>
@@ -256,7 +387,6 @@ $categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 function filtrarProductos() {
@@ -281,5 +411,7 @@ document.getElementById('buscadorProductos').addEventListener('input', filtrarPr
 document.getElementById('filtroCategoria').addEventListener('change', filtrarProductos);
 document.getElementById('filtroTipo').addEventListener('change', filtrarProductos);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

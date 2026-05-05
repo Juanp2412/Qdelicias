@@ -1,7 +1,7 @@
 <?php
 require_once "../config/conexion.php";
 
-$accion = $_POST['accion'];
+$accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
 if ($accion == "crear") {
     $producto_id = (int) $_POST['producto_id'];
@@ -43,7 +43,7 @@ if ($accion == "editar") {
 }
 
 if ($accion == "eliminar") {
-    $id = (int) $_POST['id'];
+    $id = (int) ($_GET['id'] ?? $_POST['id'] ?? 0);
 
     $conn->query("DELETE FROM producto_reglas_extras WHERE id = $id");
 }

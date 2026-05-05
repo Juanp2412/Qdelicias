@@ -116,8 +116,9 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
 <body class="bg-light">
 
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
 
-<div class="container mt-4">
+<div class="main-content">
     <div class="card p-4">
         <h3>Detalle de venta #<?php echo $venta['id']; ?></h3>
         <p><strong>Fecha:</strong> <?php echo date("d/m/Y h:i A", strtotime($venta['fecha'])); ?></p>
@@ -199,9 +200,18 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
             </table>
         </div>
 
-        <a href="dashboard.php" class="btn btn-secondary">Volver al dashboard</a>
+        <?php if ($_SESSION['rol'] == 'admin') { ?>
+
+            <a href="dashboard.php" class="btn btn-secondary">Volver al dashboard</a>
+
+        <?php } else { ?>
+
+            <a href="reporte_ventas.php" class="btn btn-secondary"">Ver Reportes</a>
+
+        <?php } ?>
     </div>
 </div>
 
 </body>
 </html>
+

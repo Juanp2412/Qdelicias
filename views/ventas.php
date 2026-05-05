@@ -34,8 +34,18 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-$productos = $conn->query("SELECT * FROM productos ORDER BY nombre ASC");
-$categorias = $conn->query("SELECT * FROM categorias ORDER BY nombre ASC");
+$productos = $conn->query("
+    SELECT * 
+    FROM productos 
+    WHERE estado = 1
+    ORDER BY nombre ASC
+");
+$categorias = $conn->query("
+    SELECT * 
+    FROM categorias 
+    WHERE estado = 1
+    ORDER BY nombre ASC
+");
 $categoriasData = [];
 $categoriasNombrePorId = [];
 $categoriaChipTemas = [];
@@ -127,8 +137,19 @@ while ($e = $extras->fetch_assoc()) {
         </div>
 
         <div class="d-flex gap-2">
-            <a href="dashboard.php" class="btn btn-light btn-sm">Dashboard</a>
+
+            <?php if ($_SESSION['rol'] == 'admin') { ?>
+
+                <a href="dashboard.php" class="btn btn-light btn-sm">Dashboard</a>
+
+            <?php } else { ?>
+
+                <a href="reporte_ventas.php" class="btn btn-info btn-sm">Ver Reportes</a>
+
+            <?php } ?>
+
             <a href="../controllers/logout.php" class="btn btn-danger btn-sm">Cerrar sesión</a>
+
         </div>
 
     </div>
@@ -721,5 +742,6 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
 
 </div>
 
+<script src="../assets/js/app.js"></script>
 </body>
 </html>

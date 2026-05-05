@@ -10,6 +10,8 @@ $producto_id = $_GET['producto_id'] ?? '';
 $productos = $conn->query("
     SELECT id, nombre, tipo_configuracion 
     FROM productos 
+    WHERE estado = 1
+    AND tipo_configuracion = 'sabores'
     ORDER BY nombre ASC
 ");
 
@@ -41,15 +43,34 @@ if ($producto_id != '') {
     <meta charset="UTF-8">
     <title>Asignar Sabores</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+    body {
+        background: #f5f6f8;
+    }
+
+    .main-content {
+        margin-left: 225px;
+        padding: 32px 24px;
+        padding-top: 80px;
+        min-height: 100vh;
+    }
+</style>
+
 </head>
 <body class="bg-light">
 
-<div class="container mt-4">
 <?php include 'layout/header.php'; ?>
+<?php include 'layout/sidebar.php'; ?>
 
-    <h3>Asignar sabores a productos</h3>
+<div class="main-content">
 
-    <div class="card p-3 mb-4">
+    <div class="mb-3">
+        <h3 class="mb-0">Asignar sabores</h3>
+        <small class="text-muted">Configura qué sabores puede usar cada producto</small>
+    </div>
+
+    <div class="card border-0 shadow-sm p-3 mb-4">
         <form method="GET" action="producto_sabores.php">
             <label class="form-label">Selecciona un producto</label>
 
@@ -79,13 +100,13 @@ if ($producto_id != '') {
         <form action="../controllers/productoSaborController.php" method="POST">
             <input type="hidden" name="producto_id" value="<?php echo $producto_id; ?>">
 
-            <div class="card p-3 mb-4">
+            <div class="card border-0 shadow-sm p-3 mb-4">
                 <h5>Sabores disponibles</h5>
 
                 <div class="row">
                     <?php while ($s = $sabores->fetch_assoc()) { ?>
                         <div class="col-md-3 mb-2">
-                            <div class="form-check border rounded p-2 bg-white">
+                            <div class="form-check border rounded p-2 bg-white h-100">
                                 <input 
                                     class="form-check-input ms-1" 
                                     type="checkbox" 
@@ -95,8 +116,8 @@ if ($producto_id != '') {
                                 >
 
                                 <label class="form-check-label ms-2">
-                                    <strong><?php echo $s['nombre']; ?></strong><br>
-                                    <small class="text-muted"><?php echo $s['tipo']; ?></small>
+                                    <span><?php echo htmlspecialchars($s['nombre']); ?></span><br>
+                                    <small class="text-muted"><?php echo htmlspecialchars($s['tipo']); ?></small>
                                 </label>
                             </div>
                         </div>
@@ -112,6 +133,6 @@ if ($producto_id != '') {
     <a href="dashboard.php" class="btn btn-secondary">Volver</a>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

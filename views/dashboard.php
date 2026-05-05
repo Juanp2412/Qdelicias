@@ -4,6 +4,8 @@ require_once "../config/conexion.php";
 require_once "../config/auth.php";
 
 verificarLogin();
+noCache();
+validarUsuarioActivo();
 
 $rol = $_SESSION['rol'] ?? 'vendedor';
 
@@ -221,7 +223,7 @@ $topPago = $topPagoQuery->fetch_assoc();
 <?php include 'layout/header.php'; ?>
 <?php include 'layout/sidebar.php'; ?>
 
-<div style="margin-left:250px; padding:86px 20px 20px 20px;">
+<div class="main-content">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Dashboard - <?php echo $tituloPeriodo; ?></h3>
