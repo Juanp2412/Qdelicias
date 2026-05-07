@@ -432,8 +432,8 @@ while ($e = $extras->fetch_assoc()) {
                                 class="form-control pago-input"
                                 id="pago_efectivo"
                                 min="0"
-                                step="0.01"
-                                value="0"
+                                step="1"
+                                value="1"
                             >
                         </div>
 
@@ -445,8 +445,8 @@ while ($e = $extras->fetch_assoc()) {
                                 class="form-control pago-input"
                                 id="pago_nequi"
                                 min="0"
-                                step="0.01"
-                                value="0"
+                                step="1"
+                                value="1"
                             >
                         </div>
 
@@ -458,8 +458,8 @@ while ($e = $extras->fetch_assoc()) {
                                 class="form-control pago-input"
                                 id="pago_daviplata"
                                 min="0"
-                                step="0.01"
-                                value="0"
+                                step="1"
+                                value="1"
                             >
                         </div>
 
@@ -471,8 +471,8 @@ while ($e = $extras->fetch_assoc()) {
                                 class="form-control pago-input"
                                 id="pago_transferencia"
                                 min="0"
-                                step="0.01"
-                                value="0"
+                                step="1"
+                                value="1"
                             >
                         </div>
 
@@ -490,9 +490,10 @@ while ($e = $extras->fetch_assoc()) {
                         class="form-control pago-input"
                         id="efectivo_recibido"
                         min="0"
-                        step="0.01"
+                        step="1"
                         value="0"
                         placeholder="Ej: 60000"
+                        inputmode="numeric"
                     >
                     <div class="vueltas-box mt-2">
                         <span>Vueltas a entregar</span>

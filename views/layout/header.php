@@ -13,11 +13,14 @@ $rol = $_SESSION['rol'] ?? 'vendedor';
 
 <div class="topbar">
 
+    <!-- BOTON MOBILE -->
+    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
     <div class="brand">
         SmartPOS
     </div>
 
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-3 ms-auto">
 
         <div class="user-box">
             <div class="name"><?php echo htmlspecialchars($nombre); ?></div>

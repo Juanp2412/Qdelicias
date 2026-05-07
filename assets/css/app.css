@@ -24,6 +24,8 @@ body {
   justify-content: space-between;
   padding: 0 25px;
   z-index: 1000;
+  gap: 15px;
+
 }
 
 .brand {
@@ -249,4 +251,44 @@ body {
   .modal-dialog-centered {
     min-height: calc(100% - 3.5rem) !important;
   }
+}
+/* RESPONSIVE SIDEBAR */
+@media (max-width: 992px) {
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: 0.3s;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .topbar {
+    left: 0;
+  }
+
+.menu-toggle {
+  display: none;
+  font-size: 22px;
+  color: white;
+  background: #1f2937;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+@media (max-width: 992px) {
+
+  .topbar {
+    left: 0 !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+}
 }

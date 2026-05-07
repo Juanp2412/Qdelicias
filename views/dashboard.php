@@ -202,28 +202,227 @@ $topPago = $topPagoQuery->fetch_assoc();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .main-content {
+        width: calc(100% - 240px);
+        max-width: 100%;
+    }
+
+    .dashboard-header {
+        gap: 14px;
+    }
+
+    .dashboard-title {
+        margin: 0;
+        font-size: clamp(20px, 2vw, 28px);
+        font-weight: 700;
+    }
+
+    .dashboard-filters {
+        max-width: 100%;
+    }
+
+    .dashboard-filters form {
+        max-width: 100%;
+    }
+
+    .dashboard-filters input[type="date"] {
+        min-width: 145px;
+    }
+
     .resumen-card{
         border: none;
         border-radius: 16px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         overflow: hidden;
+        height: 100%;
+    }
+
+    .metric-card {
+        min-height: 125px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .metric-card h5,
+    .metric-card h6 {
+        font-size: clamp(14px, 1.4vw, 18px);
+        margin-bottom: 8px;
+    }
+
+    .metric-card h2 {
+        font-size: clamp(24px, 3vw, 34px);
+        margin-bottom: 0;
+        word-break: break-word;
+    }
+
+    .dashboard-chart-card {
+        min-height: 300px;
+        height: 100%;
+    }
+
+    .dashboard-chart-box {
+        position: relative;
+        width: 100%;
+        height: 230px;
+        min-height: 230px;
+    }
+
+    .dashboard-chart-box canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
     }
 
     .ranking-card {
         min-height: 300px;
-        height: auto;
+        height: 100%;
     }
 
     .ranking-card .table-responsive {
-        max-height: 220px;
+        max-height: 230px;
         overflow-y: auto;
+        overflow-x: auto;
     }
-   
 
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    .tabla-ventas {
+        min-width: 760px;
+    }
+
+    .tabla-ranking {
+        min-width: 360px;
+    }
+
+    @media (max-width: 1199.98px) {
+        .main-content {
+            width: calc(100% - 240px);
+        }
+
+        .dashboard-chart-card,
+        .ranking-card {
+            min-height: auto;
+        }
+
+        .dashboard-chart-box {
+            height: 260px;
+            min-height: 260px;
+        }
+
+        .ranking-card .table-responsive {
+            max-height: 260px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .dashboard-header {
+            align-items: flex-start !important;
+            flex-direction: column;
+        }
+
+        .dashboard-filters,
+        .dashboard-filters form {
+            width: 100%;
+        }
+
+        .dashboard-filters .btn,
+        .dashboard-filters form .btn {
+            flex: 1 1 auto;
+        }
+
+        .dashboard-filters input[type="date"] {
+            flex: 1 1 150px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .main-content {
+            width: 100%;
+            margin-left: 0 !important;
+            padding: 82px 12px 20px 12px !important;
+        }
+
+        .dashboard-filters {
+            gap: 8px !important;
+        }
+
+        .dashboard-filters > a {
+            min-width: calc(50% - 4px);
+        }
+
+        .dashboard-filters form {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px !important;
+        }
+
+        .dashboard-filters form button {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .dashboard-chart-box {
+            height: 240px;
+            min-height: 240px;
+        }
+
+        .resumen-card {
+            border-radius: 14px;
+        }
+
+        .table {
+            font-size: 13px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .dashboard-filters > a {
+            min-width: 100%;
+        }
+
+        .dashboard-filters form {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-filters form button {
+            grid-column: auto;
+        }
+
+        .dashboard-chart-box {
+            height: 220px;
+            min-height: 220px;
+        }
+
+        .tabla-ranking {
+            min-width: 300px;
+        }
+
+        .tabla-ventas {
+            min-width: 680px;
+        }
+    }
     </style>
 
           
@@ -236,10 +435,10 @@ $topPago = $topPagoQuery->fetch_assoc();
 
 <div class="main-content">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Dashboard - <?php echo $tituloPeriodo; ?></h3>
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
+        <h3 class="dashboard-title">Dashboard - <?php echo $tituloPeriodo; ?></h3>
 
-        <div class="d-flex gap-2 flex-wrap align-items-center">
+        <div class="dashboard-filters d-flex gap-2 flex-wrap align-items-center">
             <a href="?filtro=hoy" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='hoy')?'active':''; ?>">Hoy</a>
             <a href="?filtro=semana" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='semana')?'active':''; ?>">Semana</a>
             <a href="?filtro=mes" class="btn btn-sm btn-outline-primary <?php echo ($filtro=='mes')?'active':''; ?>">Mes</a>
@@ -272,22 +471,22 @@ $topPago = $topPagoQuery->fetch_assoc();
     </div>
 
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card resumen-card p-4 text-center">
+        <div class="col-xl-4 col-md-6 col-12 mb-3">
+            <div class="card resumen-card metric-card p-4 text-center">
                 <h5>Total vendido</h5>
                 <h2 class="text-success">$ <?php echo number_format($totalPeriodo, 0, ',', '.'); ?></h2>
             </div>
         </div>
 
-        <div class="col-md-4 mb-3">
-            <div class="card resumen-card p-4 text-center">
+        <div class="col-xl-4 col-md-6 col-12 mb-3">
+            <div class="card resumen-card metric-card p-4 text-center">
                 <h5>Número de ventas</h5>
                 <h2 class="text-primary"><?php echo $cantidadVentas; ?></h2>
             </div>
         </div>
 
-        <div class="col-md-4 mb-3">
-            <div class="card resumen-card p-4 text-center">
+        <div class="col-xl-4 col-md-6 col-12 mb-3">
+            <div class="card resumen-card metric-card p-4 text-center">
                 <h5>Ticket promedio</h5>
                 <h2 class="text-warning">$ <?php echo number_format($ticketPromedio, 0, ',', '.'); ?></h2>
             </div>
@@ -295,8 +494,8 @@ $topPago = $topPagoQuery->fetch_assoc();
     </div>
     <div class="row mb-4">
 
-    <div class="col-md-4 mb-3">
-        <div class="card resumen-card p-3 text-center">
+    <div class="col-xl-4 col-md-6 col-12 mb-3">
+        <div class="card resumen-card metric-card p-3 text-center">
             <h6>🔥 Producto más vendido</h6>
             <strong>
                 <?php echo $topCantidad['nombre'] ?? 'N/A'; ?>
@@ -305,8 +504,8 @@ $topPago = $topPagoQuery->fetch_assoc();
         </div>
     </div>
 
-    <div class="col-md-4 mb-3">
-        <div class="card resumen-card p-3 text-center">
+    <div class="col-xl-4 col-md-6 col-12 mb-3">
+        <div class="card resumen-card metric-card p-3 text-center">
             <h6>💰 Producto más rentable</h6>
             <strong>
                 <?php echo $topIngreso['nombre'] ?? 'N/A'; ?>
@@ -317,8 +516,8 @@ $topPago = $topPagoQuery->fetch_assoc();
         </div>
     </div>
 
-    <div class="col-md-4 mb-3">
-        <div class="card resumen-card p-3 text-center">
+    <div class="col-xl-4 col-md-6 col-12 mb-3">
+        <div class="card resumen-card metric-card p-3 text-center">
             <h6>💳 Método de pago top</h6>
             <strong>
                 <?php echo ucfirst($topPago['metodo_pago'] ?? 'N/A'); ?>
@@ -332,19 +531,19 @@ $topPago = $topPagoQuery->fetch_assoc();
 </div>
 
     <div class="row mb-4">
-        <div class="col-md-8 mb-3">
-            <div class="card resumen-card p-3" style="height:300px;">
+        <div class="col-xl-8 col-lg-12 mb-3">
+            <div class="card resumen-card dashboard-chart-card p-3">
                 <h5>Ventas del periodo</h5>
-                <div style="height:230px;">
+                <div class="dashboard-chart-box">
                     <canvas id="graficaVentas"></canvas>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-3">
-            <div class="card resumen-card p-3" style="height:300px;">
+        <div class="col-xl-4 col-lg-12 mb-3">
+            <div class="card resumen-card dashboard-chart-card p-3">
                 <h5>Métodos de pago</h5>
-                <div style="height:230px;">
+                <div class="dashboard-chart-box">
                     <canvas id="graficaPagos"></canvas>
                 </div>
             </div>
@@ -352,19 +551,21 @@ $topPago = $topPagoQuery->fetch_assoc();
     </div>
 
     <div class="row mb-4">
-        <div class="col-md-7 mb-3">
-            <div class="card resumen-card p-3" style="height:300px;">
+        <div class="col-xl-7 col-lg-12 mb-3">
+            <div class="card resumen-card dashboard-chart-card p-3">
                 <h5>Productos más vendidos</h5>
-                <canvas id="graficaProductos" height="150"></canvas>
+                <div class="dashboard-chart-box">
+                    <canvas id="graficaProductos"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-5 mb-3">
+        <div class="col-xl-5 col-lg-12 mb-3">
             <div class="card resumen-card ranking-card p-3">
                 <h5>Ranking productos</h5>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered table-sm mt-3">
+                    <table class="table table-bordered table-sm mt-3 tabla-ranking">
                     <thead class="table-dark">
                         <tr>
                             <th>Producto</th>
@@ -393,11 +594,13 @@ $topPago = $topPagoQuery->fetch_assoc();
         </div>
     </div>
 
+    </div>
+
     <div class="card resumen-card p-3 mt-4 mb-4">
         <h5>Últimas ventas del periodo</h5>
 
         <div class="table-responsive">
-            <table class="table table-bordered mt-3">
+            <table class="table table-bordered mt-3 tabla-ventas">
                 <thead class="table-dark">
                     <tr>
                         <th>ID Venta</th>
