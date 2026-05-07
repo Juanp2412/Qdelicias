@@ -206,11 +206,22 @@ $topPago = $topPagoQuery->fetch_assoc();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     <style>
-        .resumen-card{
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
+    .resumen-card{
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .ranking-card {
+        min-height: 300px;
+        height: auto;
+    }
+
+    .ranking-card .table-responsive {
+        max-height: 220px;
+        overflow-y: auto;
+    }
    
 
     </style>
@@ -349,10 +360,11 @@ $topPago = $topPagoQuery->fetch_assoc();
         </div>
 
         <div class="col-md-5 mb-3">
-            <div class="card resumen-card p-3" style="height:300px;">
+            <div class="card resumen-card ranking-card p-3">
                 <h5>Ranking productos</h5>
 
-                <table class="table table-bordered mt-3">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mt-3">
                     <thead class="table-dark">
                         <tr>
                             <th>Producto</th>
@@ -377,7 +389,6 @@ $topPago = $topPagoQuery->fetch_assoc();
                         <?php } ?>
                     </tbody>
                 </table>
-
             </div>
         </div>
     </div>
