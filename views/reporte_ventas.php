@@ -23,6 +23,7 @@
 |--------------------------------------------------------------------------
 */
 session_start();
+date_default_timezone_set('America/Bogota');
 require_once "../config/conexion.php";
 require_once "../config/auth.php";
 
