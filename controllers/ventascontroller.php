@@ -26,6 +26,11 @@ if (!$data) {
 $carrito = $data['carrito'] ?? [];
 $total = isset($data['total']) ? (float)$data['total'] : 0;
 $pagos = $data['pagos'] ?? [];
+$subtotalSinDescuento = isset($data['subtotal_sin_descuento']) ? (float)$data['subtotal_sin_descuento'] : $total;
+$descuento = isset($data['descuento']) ? (float)$data['descuento'] : 0;
+$descuentoPorcentaje = isset($data['descuento_porcentaje']) ? (float)$data['descuento_porcentaje'] : 0;
+$descuentoValor = isset($data['descuento_valor']) ? (float)$data['descuento_valor'] : 0;
+$promocion = trim($data['promocion'] ?? '');
 
 if (empty($carrito)) {
     echo "Error: carrito vacío";
@@ -66,8 +71,22 @@ $metodo_pago = count($metodosUsados) === 1 ? $metodosUsados[0] : 'mixto';
 $conn->begin_transaction();
 
 try {
-    $stmtVenta = $conn->prepare("INSERT INTO ventas (total, metodo_pago) VALUES (?, ?)");
-    $stmtVenta->bind_param("ds", $total, $metodo_pago);
+    $stmtVenta = $conn->prepare("
+        INSERT INTO ventas 
+        (subtotal_sin_descuento, descuento, descuento_porcentaje, descuento_valor, promocion, total, metodo_pago) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmtVenta->bind_param(
+        "ddddsds",
+        $subtotalSinDescuento,
+        $descuento,
+        $descuentoPorcentaje,
+        $descuentoValor,
+        $promocion,
+        $total,
+        $metodo_pago
+    );
 
     if (!$stmtVenta->execute()) {
         throw new Exception("Error al guardar la venta: " . $stmtVenta->error);

@@ -1866,3 +1866,304 @@ body {
     animation: none !important;
   }
 }
+/* ============================================================
+   MEJORA MODAL EXTRAS / SABORES
+   ============================================================ */
+
+.modal-opciones-toolbar-pro {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  border: 2px solid #fb923c;
+  background: #fff7ed;
+  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.18);
+}
+
+.modal-search-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #fed7aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.modal-search-input {
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 38px;
+}
+
+.reglas-producto-box {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  border-radius: 13px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.reglas-producto-title {
+  font-weight: 800;
+  color: #166534;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.reglas-producto-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.regla-producto-chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  background: #ffffff;
+  border: 1px solid #86efac;
+  color: #14532d;
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.regla-producto-chip small {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.reglas-producto-box-empty {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+  font-weight: 700;
+}
+
+.grupo-extra-pro {
+  border-radius: 14px;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.modal-extra-title-pro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.modal-extra-title-pro small {
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.extra-item-pro {
+  border-width: 1.5px;
+  transition: 0.12s ease;
+}
+
+.extra-item-pro:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.tipo-extra-salsa {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.tipo-extra-salsa .modal-extra-title-pro {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.tipo-extra-helado {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.tipo-extra-helado .modal-extra-title-pro {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.tipo-extra-clasico {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.tipo-extra-clasico .modal-extra-title-pro {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.tipo-extra-premium {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.tipo-extra-premium .modal-extra-title-pro {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.tipo-extra-topping {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.tipo-extra-topping .modal-extra-title-pro {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.tipo-extra-fruta {
+  background: #ecfeff;
+  border-color: #a5f3fc;
+}
+
+.tipo-extra-fruta .modal-extra-title-pro {
+  background: #cffafe;
+  color: #0e7490;
+}
+
+.tipo-extra-default {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.tipo-extra-default .modal-extra-title-pro {
+  background: #e2e8f0;
+  color: #334155;
+}
+/* ============================================================
+   PROMOCIONES / DESCUENTOS
+   ============================================================ */
+
+.promo-card {
+  border: 1px solid #fed7aa;
+  background: linear-gradient(145deg, #fff7ed, #ffffff);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.promo-head {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 8px;
+}
+
+.promo-head strong {
+  font-size: 13px;
+  font-weight: 900;
+  color: #9a3412;
+}
+
+.promo-head small {
+  font-size: 11px;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.promo-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.promo-buttons .btn {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 4px;
+  border-radius: 9px;
+}
+
+.promo-card .form-label {
+  font-size: 10px;
+  color: #92400e;
+  font-weight: 800;
+}
+
+.promo-resumen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.promo-resumen span {
+  background: #fff;
+  border: 1px solid #ffedd5;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #78350f;
+  font-weight: 700;
+}
+
+.promo-resumen strong {
+  display: block;
+  font-size: 13px;
+  color: #111827;
+}
+.rc-chip--extra-incluido {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.rc-chip--extra-cobrado {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #c2410c;
+}
+
+.rc-chip small {
+  font-size: 11px;
+  font-weight: 900;
+  margin-left: 4px;
+}
+/* ============================================================
+   FILTROS RÁPIDOS POR TIPO DE EXTRA
+   ============================================================ */
+
+.filtros-tipo-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 13px;
+}
+
+.btn-filtro-tipo-extra {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.12s ease;
+}
+
+.btn-filtro-tipo-extra:hover {
+  background: #e2e8f0;
+}
+
+.btn-filtro-tipo-extra.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+}

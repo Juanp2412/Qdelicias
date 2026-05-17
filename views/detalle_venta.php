@@ -123,6 +123,21 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
         <h3>Detalle de venta #<?php echo $venta['id']; ?></h3>
         <p><strong>Fecha:</strong> <?php echo date("d/m/Y h:i A", strtotime($venta['fecha'])); ?></p>
         <p><strong>Total:</strong> $ <?php echo number_format($venta['total'], 0, ',', '.'); ?></p>
+        <?php if (($venta['descuento'] ?? 0) > 0 || !empty($venta['promocion'])) { ?>
+            <div class="alert alert-warning">
+                <strong>Promoción aplicada:</strong>
+                <?php echo !empty($venta['promocion']) ? htmlspecialchars($venta['promocion']) : 'Descuento manual'; ?>
+                <br>
+                <strong>Subtotal:</strong> $ <?php echo number_format($venta['subtotal_sin_descuento'], 0, ',', '.'); ?>
+                <br>
+                <strong>Descuento:</strong>
+                <?php if (($venta['descuento_porcentaje'] ?? 0) > 0) { ?>
+                    <?php echo number_format($venta['descuento_porcentaje'], 0, ',', '.'); ?>%
+                <?php } ?>
+
+                -$ <?php echo number_format($venta['descuento'], 0, ',', '.'); ?>
+            </div>
+        <?php } ?>
         <p><strong>Método de pago:</strong> <?php echo ucfirst(htmlspecialchars($venta['metodo_pago'] ?? 'efectivo')); ?></p>
             <?php if (!empty($pagos)) { ?>
                 <p><strong>Detalle del pago:</strong></p>

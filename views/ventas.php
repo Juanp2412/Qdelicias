@@ -67,7 +67,7 @@ while ($cat = $categorias->fetch_assoc()) {
     $categoriaChipTemas[$catId] = $temasChip[$temIndex];
 }
 
-$sqlSabores = "SELECT ps.producto_id, s.id, s.nombre
+$sqlSabores = "SELECT DISTINCT ps.producto_id, s.id, s.nombre
                FROM producto_sabores ps
                INNER JOIN sabores s ON s.id = ps.sabor_id
                WHERE s.activo = 1
@@ -82,10 +82,23 @@ while ($filaSabor = $resultSabores->fetch_assoc()) {
         $saboresPorProducto[$productoId] = [];
     }
 
-    $saboresPorProducto[$productoId][] = [
-        'id' => (int)$filaSabor['id'],
-        'nombre' => $filaSabor['nombre']
-    ];
+    $saborId = (int)$filaSabor['id'];
+
+    $yaExiste = false;
+
+    foreach ($saboresPorProducto[$productoId] as $saborExistente) {
+        if ((int)$saborExistente['id'] === $saborId) {
+            $yaExiste = true;
+            break;
+        }
+    }
+
+    if (!$yaExiste) {
+        $saboresPorProducto[$productoId][] = [
+            'id' => $saborId,
+            'nombre' => $filaSabor['nombre']
+        ];
+    }
 }
 $extras = $conn->query("SELECT * FROM extras ORDER BY nombre ASC");
 $reglasDB = $conn->query("SELECT producto_id, tipo_extra, cantidad_incluida FROM producto_reglas_extras");
@@ -295,15 +308,15 @@ while ($e = $extras->fetch_assoc()) {
                     </div>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        onclick="abrirConfirmacionVenta()"
-                    >
-                        Abrir carrito grande
-                    </button>
-                </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-danger flex-fill" onclick="vaciarCarrito()">
+                    Vaciar carrito
+                </button>
+
+                <button type="button" class="btn btn-primary flex-fill" onclick="abrirConfirmacionVenta()">
+                    Abrir carrito grande
+                </button>
+            </div>
 
             </div>
 
@@ -333,6 +346,63 @@ while ($e = $extras->fetch_assoc()) {
             <div class="total-box mb-2">
                 Total: $ <span id="total">0</span>
             </div>
+            
+            <div class="promo-card mb-2">
+            <div class="promo-head">
+                <strong>Promos / descuentos</strong>
+                <small>Úsalo para 15%, 2x1, cortesías u obsequios</small>
+            </div>
+
+            <div class="promo-buttons">
+                <button type="button" class="btn btn-outline-warning btn-sm" onclick="aplicarDescuentoRapido(10)">10%</button>
+                <button type="button" class="btn btn-outline-warning btn-sm" onclick="aplicarDescuentoRapido(15)">15%</button>
+                <button type="button" class="btn btn-outline-warning btn-sm" onclick="aplicarDescuentoRapido(20)">20%</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="limpiarPromocion()">Quitar</button>
+            </div>
+
+            <div class="row g-2 mt-1">
+                <div class="col-6">
+                    <label class="form-label mb-1">Desc. %</label>
+                    <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        class="form-control form-control-sm"
+                        id="inputDescuentoPorcentaje"
+                        value="0"
+                        oninput="actualizarDescuentoPorcentaje(this.value)"
+                    >
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label mb-1">Desc. $</label>
+                    <input
+                        type="number"
+                        min="0"
+                        class="form-control form-control-sm"
+                        id="inputDescuentoValor"
+                        value="0"
+                        oninput="actualizarDescuentoValor(this.value)"
+                    >
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label mb-1">Nota de promo</label>
+                    <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        id="inputPromocionTexto"
+                        placeholder="Ej: 15% madres, 2x1 fresas, cortesía mini..."
+                        oninput="actualizarTextoPromocion(this.value)"
+                    >
+                </div>
+            </div>
+
+            <div class="promo-resumen mt-2">
+                <span>Subtotal: <strong id="promoSubtotal">$ 0</strong></span>
+                <span>Descuento: <strong id="promoDescuento">$ 0</strong></span>
+            </div>
+        </div>
 
             <div id="paymentDock">
 
@@ -683,6 +753,7 @@ const saboresPorProducto = <?php echo json_encode($saboresPorProducto, JSON_UNES
                         type="button"
                         class="btn btn-primary"
                         data-bs-dismiss="modal"
+                        onclick="cerrarCheckout()"
                     >
                         Continuar venta
                     </button>

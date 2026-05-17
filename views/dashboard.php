@@ -172,7 +172,16 @@ $topCantidadQuery = $conn->query("
 $topCantidad = $topCantidadQuery->fetch_assoc();
 
 $topIngresoQuery = $conn->query("
-    SELECT p.nombre, SUM(d.cantidad * d.precio) AS ingreso
+    SELECT 
+        p.nombre,
+        SUM(
+            (d.cantidad * d.precio) +
+            COALESCE((
+                SELECT SUM(dve.precio)
+                FROM detalle_venta_extras dve
+                WHERE dve.detalle_venta_id = d.id
+            ), 0)
+        ) AS ingreso
     FROM detalle_venta d
     INNER JOIN productos p ON p.id = d.producto_id
     INNER JOIN ventas v ON v.id = d.venta_id

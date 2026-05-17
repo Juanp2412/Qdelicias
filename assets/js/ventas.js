@@ -16,6 +16,7 @@ let edicionCarrito = { activa: false, index: null };
 let modalResumenPedidoInstance = null;
 let modalPagoPedidoInstance = null;
 let filtroModalOpciones = '';
+let filtroTipoExtraModal = 'todos';
 let editarDesdeResumen = false;
 let resumenModoLectura = false;
 let resumenConfigExpandida = {};
@@ -24,6 +25,11 @@ let pagoDockSiguiente = null;
 let modoPagoActual = 'ninguno';
 let metodoPagoSimpleActual = null;
 let pagoCheckoutMinimizado = false;
+let subtotalSinDescuento = 0;
+let descuentoPorcentaje = 0;
+let descuentoValor = 0;
+let promocionTexto = '';
+let descuentoAplicado = 0;
 
 // Inicializar contadores de extras
 extrasCatalogo.forEach(extra => {
@@ -73,7 +79,86 @@ function calcularExtrasAplicados(productoId, extrasSeleccionados) {
 }
 
 function recalcularTotalCarrito() {
-    total = carrito.reduce((acc, item) => acc + (parseFloat(item.subtotal) || 0), 0);
+    subtotalSinDescuento = carrito.reduce((acc, item) => acc + (parseFloat(item.subtotal) || 0), 0);
+
+    let descuentoPorPorcentaje = 0;
+
+    if (descuentoPorcentaje > 0) {
+        descuentoPorPorcentaje = subtotalSinDescuento * (descuentoPorcentaje / 100);
+    }
+
+    descuentoAplicado = descuentoPorPorcentaje + descuentoValor;
+
+    if (descuentoAplicado > subtotalSinDescuento) {
+        descuentoAplicado = subtotalSinDescuento;
+    }
+
+    total = subtotalSinDescuento - descuentoAplicado;
+
+    actualizarVistaPromocion();
+}
+function actualizarVistaPromocion() {
+    const subtotalEl = document.getElementById('promoSubtotal');
+    const descuentoEl = document.getElementById('promoDescuento');
+
+    if (subtotalEl) {
+        subtotalEl.textContent = '$ ' + formatearPeso(subtotalSinDescuento);
+    }
+
+    if (descuentoEl) {
+        descuentoEl.textContent = '-$ ' + formatearPeso(descuentoAplicado);
+    }
+}
+
+function aplicarDescuentoRapido(porcentaje) {
+    descuentoPorcentaje = parseFloat(porcentaje) || 0;
+
+    const input = document.getElementById('inputDescuentoPorcentaje');
+    if (input) input.value = descuentoPorcentaje;
+
+    recalcularTotalCarrito();
+    renderCarrito();
+}
+
+function actualizarDescuentoPorcentaje(valor) {
+    descuentoPorcentaje = parseFloat(valor) || 0;
+
+    if (descuentoPorcentaje < 0) descuentoPorcentaje = 0;
+    if (descuentoPorcentaje > 100) descuentoPorcentaje = 100;
+
+    recalcularTotalCarrito();
+    renderCarrito();
+}
+
+function actualizarDescuentoValor(valor) {
+    descuentoValor = parseFloat(valor) || 0;
+
+    if (descuentoValor < 0) descuentoValor = 0;
+
+    recalcularTotalCarrito();
+    renderCarrito();
+}
+
+function actualizarTextoPromocion(valor) {
+    promocionTexto = valor || '';
+}
+
+function limpiarPromocion() {
+    descuentoPorcentaje = 0;
+    descuentoValor = 0;
+    promocionTexto = '';
+    descuentoAplicado = 0;
+
+    const inputPorcentaje = document.getElementById('inputDescuentoPorcentaje');
+    const inputValor = document.getElementById('inputDescuentoValor');
+    const inputTexto = document.getElementById('inputPromocionTexto');
+
+    if (inputPorcentaje) inputPorcentaje.value = 0;
+    if (inputValor) inputValor.value = 0;
+    if (inputTexto) inputTexto.value = '';
+
+    recalcularTotalCarrito();
+    renderCarrito();
 }
 
 /* ─── Categorías ─────────────────────────────────────────── */
@@ -276,14 +361,17 @@ function abrirModalProducto(id, nombre, precio, tipo) {
 
 function renderToolbarOpcionesModal() {
     return `
-        <div class="modal-opciones-toolbar mb-3">
+        <div class="modal-opciones-toolbar modal-opciones-toolbar-pro mb-3">
+            <div class="modal-search-icon">🔎</div>
+
             <input
                 type="text"
-                class="form-control form-control-sm"
-                placeholder="Buscar extra o sabor..."
+                class="form-control form-control-sm modal-search-input"
+                placeholder="Buscar salsa, topping, helado o sabor..."
                 value="${filtroModalOpciones}"
                 oninput="filtrarOpcionesModal(this.value)"
             >
+
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltroOpcionesModal()">
                 Limpiar
             </button>
@@ -293,27 +381,117 @@ function renderToolbarOpcionesModal() {
 function filtrarOpcionesModal(texto) {
     filtroModalOpciones = (texto || '').toLowerCase().trim();
 
+    const hayBusqueda = filtroModalOpciones.length > 0;
+
     const opciones = document.querySelectorAll('#modalExtrasContenido .modal-opcion-wrap');
+
     opciones.forEach(opcion => {
         const nombre = (opcion.dataset.nombre || '').toLowerCase();
-        opcion.style.display = (!filtroModalOpciones || nombre.includes(filtroModalOpciones)) ? '' : 'none';
+        const tipo = (opcion.dataset.tipo || '').toLowerCase();
+
+        let mostrar = true;
+
+        if (hayBusqueda) {
+            // El buscador manda sobre todo: busca en general.
+            mostrar = nombre.includes(filtroModalOpciones);
+        } else {
+            // Solo cuando no hay búsqueda, aplica filtro por tipo.
+            mostrar = filtroTipoExtraModal === 'todos' || tipo === filtroTipoExtraModal;
+        }
+
+        opcion.style.display = mostrar ? '' : 'none';
     });
 
     const grupos = document.querySelectorAll('#modalExtrasContenido .modal-tipo-group');
+
     grupos.forEach(grupo => {
-        const visibles = Array.from(grupo.querySelectorAll('.modal-opcion-wrap')).some(el => el.style.display !== 'none');
+        const visibles = Array.from(grupo.querySelectorAll('.modal-opcion-wrap'))
+            .some(el => el.style.display !== 'none');
+
         grupo.style.display = visibles ? '' : 'none';
     });
 }
 
 function limpiarFiltroOpcionesModal() {
     filtroModalOpciones = '';
+
     const input = document.querySelector('#modalExtrasContenido .modal-opciones-toolbar input');
     if (input) input.value = '';
+
     filtrarOpcionesModal('');
+}
+function normalizarTipoExtra(tipo) {
+    return (tipo || '')
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function cambiarFiltroTipoExtra(tipo) {
+    filtroTipoExtraModal = tipo || 'todos';
+
+    document.querySelectorAll('.btn-filtro-tipo-extra').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    const activo = document.querySelector(`.btn-filtro-tipo-extra[data-tipo="${filtroTipoExtraModal}"]`);
+    if (activo) activo.classList.add('active');
+
+    filtrarOpcionesModal(filtroModalOpciones);
+}
+
+function renderFiltrosTipoExtra(extrasPorTipo) {
+    const tipos = Object.keys(extrasPorTipo);
+
+    if (tipos.length <= 1) return '';
+
+    let html = `
+        <div class="filtros-tipo-extra mb-3">
+            <button
+                type="button"
+                class="btn-filtro-tipo-extra active"
+                data-tipo="todos"
+                onclick="cambiarFiltroTipoExtra('todos')"
+            >
+                Todos
+            </button>
+    `;
+
+    tipos.forEach(tipo => {
+        const tipoNormalizado = normalizarTipoExtra(tipo);
+
+        html += `
+            <button
+                type="button"
+                class="btn-filtro-tipo-extra"
+                data-tipo="${tipoNormalizado}"
+                onclick="cambiarFiltroTipoExtra('${tipoNormalizado}')"
+            >
+                ${tipo}
+            </button>
+        `;
+    });
+
+    html += `</div>`;
+
+    return html;
 }
 
 /* ─── Render extras en modal ─────────────────────────────── */
+function obtenerClaseTipoExtra(tipo) {
+    const t = (tipo || '').toLowerCase().trim();
+
+    if (t.includes('salsa')) return 'tipo-extra-salsa';
+    if (t.includes('helado')) return 'tipo-extra-helado';
+    if (t.includes('premium')) return 'tipo-extra-premium';
+    if (t.includes('clasico') || t.includes('clásico')) return 'tipo-extra-clasico';
+    if (t.includes('topping')) return 'tipo-extra-topping';
+    if (t.includes('fruta')) return 'tipo-extra-fruta';
+
+    return 'tipo-extra-default';
+}
+
 function renderExtrasEnModal(productoId) {
     const contenedor = document.getElementById('modalExtrasContenido');
     const reglasBox = document.getElementById('modalReglasProducto');
@@ -321,32 +499,64 @@ function renderExtrasEnModal(productoId) {
     const reglas = reglasProductos[productoId] || {};
 
     reglasBox.innerHTML = Object.keys(reglas).length
-        ? Object.entries(reglas).map(([tipo, cantidad]) =>
-            `<span class="badge bg-success me-2 mb-2">${tipo}: ${cantidad} incluido(s)</span>`
-        ).join('')
-        : "<span class='text-muted'>Este producto no tiene extras incluidos configurados.</span>";
+        ? `
+            <div class="reglas-producto-box">
+                <div class="reglas-producto-title">Extras incluidos en este producto</div>
+                <div class="reglas-producto-list">
+                    ${Object.entries(reglas).map(([tipo, cantidad]) => `
+                        <span class="regla-producto-chip">
+                            <strong>${tipo}</strong>
+                            <small>${cantidad} incluido(s)</small>
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        `
+        : `
+            <div class="reglas-producto-box reglas-producto-box-empty">
+                Este producto no tiene extras incluidos. Todo extra seleccionado se cobra.
+            </div>
+        `;
 
     const extrasPorTipo = {};
+
     extrasCatalogo.forEach(extra => {
         if (!extrasPorTipo[extra.tipo]) extrasPorTipo[extra.tipo] = [];
         extrasPorTipo[extra.tipo].push(extra);
     });
 
+    filtroTipoExtraModal = 'todos';
+
     let html = renderToolbarOpcionesModal();
+    html += renderFiltrosTipoExtra(extrasPorTipo);
+
     Object.keys(extrasPorTipo).forEach(tipo => {
-        html += `<div class="mb-3 modal-tipo-group"><h6 class="modal-extra-title">${tipo}</h6><div class="row">`;
+        const claseTipo = obtenerClaseTipoExtra(tipo);
+
+        html += `
+            <div class="mb-3 modal-tipo-group grupo-extra-pro ${claseTipo}" data-tipo="${normalizarTipoExtra(tipo)}">
+                <div class="modal-extra-title-pro">
+                    <span>${tipo}</span>
+                    <small>${extrasPorTipo[tipo].length} opciones</small>
+                </div>
+
+                <div class="row">
+        `;
 
         extrasPorTipo[tipo].forEach(extra => {
             const cantidad = cantidadesExtras[extra.id] || 0;
+
             html += `
-                <div class="${_colClaseModal} modal-opcion-wrap" data-nombre="${(extra.nombre || '').toLowerCase()}">
-                    <div class="extra-item h-100">
+                <div class="${_colClaseModal} modal-opcion-wrap" data-nombre="${(extra.nombre || '').toLowerCase()}" data-tipo="${normalizarTipoExtra(tipo)}">
+                    <div class="extra-item h-100 extra-item-pro">
                         <div>
                             <strong>${extra.nombre}</strong><br>
                             <small class="text-muted">$ ${formatearPeso(extra.precio)}</small>
                         </div>
+
                         <div class="qty-controls">
                             <button type="button" class="qty-btn minus" onclick="cambiarCantidadExtra(${extra.id}, -1)">-</button>
+
                             <input
                                 type="number"
                                 min="0"
@@ -357,13 +567,17 @@ function renderExtrasEnModal(productoId) {
                                 value="${cantidad}"
                                 oninput="establecerCantidadExtra(${extra.id}, this.value)"
                             >
-                            <button type="button" class="qty-btn plus"  onclick="cambiarCantidadExtra(${extra.id}, 1)">+</button>
+
+                            <button type="button" class="qty-btn plus" onclick="cambiarCantidadExtra(${extra.id}, 1)">+</button>
                         </div>
                     </div>
                 </div>`;
         });
 
-        html += '</div></div>';
+        html += `
+                </div>
+            </div>
+        `;
     });
 
     contenedor.innerHTML = html;
@@ -742,6 +956,18 @@ function vaciarCarrito() {
     pagoAutoSeleccionado = false;
     modoPagoActual = 'ninguno';
     metodoPagoSimpleActual = null;
+    descuentoPorcentaje = 0;
+    descuentoValor = 0;
+    promocionTexto = '';
+    descuentoAplicado = 0;
+
+    const inputPorcentaje = document.getElementById('inputDescuentoPorcentaje');
+    const inputValor = document.getElementById('inputDescuentoValor');
+    const inputTexto = document.getElementById('inputPromocionTexto');
+
+    if (inputPorcentaje) inputPorcentaje.value = 0;
+    if (inputValor) inputValor.value = 0;
+    if (inputTexto) inputTexto.value = '';
 
     ['pago_efectivo', 'pago_nequi', 'pago_daviplata', 'pago_transferencia'].forEach(id => {
         document.getElementById(id).value = 0;
@@ -763,6 +989,8 @@ function formatearPeso(valor) {
 function renderCarrito() {
     const tbody = document.querySelector('#tabla tbody');
     tbody.innerHTML = '';
+
+    recalcularTotalCarrito();
 
     if (carrito.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No hay productos en el carrito</td></tr>`;
@@ -997,10 +1225,26 @@ function renderResumenPedido() {
 
         if (mostrarExtras && item.extras && item.extras.length > 0) {
             item.extras.forEach(extra => {
-                const plus = extra.cantidad_cobrada > 0
-                    ? ` <span class="rc-chip-price">+$${formatearPeso(extra.cantidad_cobrada * extra.precio)}</span>`
-                    : '';
-                chipsConfig.push(`<span class="rc-chip rc-chip--extra">${extra.nombre} × ${extra.cantidad}${plus}</span>`);
+                const incluida = parseInt(extra.cantidad_incluida, 10) || 0;
+                const cobrada = parseInt(extra.cantidad_cobrada, 10) || 0;
+
+                if (incluida > 0) {
+                    chipsConfig.push(`
+                        <span class="rc-chip rc-chip--extra-incluido">
+                            ${extra.nombre} × ${incluida}
+                            <small>Incluido</small>
+                        </span>
+                    `);
+                }
+
+                if (cobrada > 0) {
+                    chipsConfig.push(`
+                        <span class="rc-chip rc-chip--extra-cobrado">
+                            ${extra.nombre} × ${cobrada}
+                            <small>+$${formatearPeso(cobrada * extra.precio)}</small>
+                        </span>
+                    `);
+                }
             });
         }
 
@@ -1291,7 +1535,16 @@ function guardarVenta(origen = 'principal') {
     fetch('../controllers/ventascontroller.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ carrito, total, pagos })
+        body: JSON.stringify({
+        carrito,
+        total,
+        pagos,
+        subtotal_sin_descuento: subtotalSinDescuento,
+        descuento: descuentoAplicado,
+        descuento_porcentaje: descuentoPorcentaje,
+        descuento_valor: descuentoValor,
+        promocion: promocionTexto
+    })
     })
         .then(response => response.text())
         .then(data => {
@@ -1300,6 +1553,19 @@ function guardarVenta(origen = 'principal') {
             if (data.toLowerCase().includes('correctamente')) {
                 carrito = [];
                 total = 0;
+                subtotalSinDescuento = 0;
+                descuentoPorcentaje = 0;
+                descuentoValor = 0;
+                promocionTexto = '';
+                descuentoAplicado = 0;
+
+                const inputPorcentaje = document.getElementById('inputDescuentoPorcentaje');
+                const inputValor = document.getElementById('inputDescuentoValor');
+                const inputTexto = document.getElementById('inputPromocionTexto');
+
+                if (inputPorcentaje) inputPorcentaje.value = 0;
+                if (inputValor) inputValor.value = 0;
+                if (inputTexto) inputTexto.value = '';
 
                 ['pago_efectivo', 'pago_nequi', 'pago_daviplata', 'pago_transferencia'].forEach(id => {
                     document.getElementById(id).value = 0;
@@ -1382,11 +1648,20 @@ function cerrarCheckout() {
     const modalResumenEl = document.getElementById('modalResumenPedido');
     const modalPagoEl = document.getElementById('modalPagoPedido');
 
-    const modalResumen = modalResumenEl ? (modalResumenPedidoInstance || bootstrap.Modal.getInstance(modalResumenEl)) : null;
-    const modalPago = modalPagoEl ? (modalPagoPedidoInstance || bootstrap.Modal.getInstance(modalPagoEl)) : null;
+    if (modalPagoPedidoInstance) {
+        modalPagoPedidoInstance.hide();
+    } else if (modalPagoEl) {
+        const modalPago = bootstrap.Modal.getInstance(modalPagoEl);
+        if (modalPago) modalPago.hide();
+    }
 
-    if (modalPago) modalPago.hide();
-    if (modalResumen) modalResumen.hide();
+    if (modalResumenPedidoInstance) {
+        modalResumenPedidoInstance.hide();
+    } else if (modalResumenEl) {
+        const modalResumen = bootstrap.Modal.getInstance(modalResumenEl);
+        if (modalResumen) modalResumen.hide();
+    }
+
     devolverPagoAlLateral();
     toggleMinimizarPagoCheckout(false);
 }
