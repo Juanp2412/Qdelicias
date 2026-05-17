@@ -53,7 +53,14 @@ if (!$venta) {
 }
 
 $detallesQuery = $conn->query("
-    SELECT d.id, d.cantidad, d.precio, p.nombre AS producto_nombre
+    SELECT 
+        d.id,
+        d.cantidad,
+        d.precio,
+        d.es_cortesia,
+        d.motivo_cortesia,
+        d.precio_original,
+        p.nombre AS producto_nombre
     FROM detalle_venta d
     INNER JOIN productos p ON p.id = d.producto_id
     WHERE d.venta_id = $venta_id
@@ -82,7 +89,15 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
     }
 
     // total del producto (base + extras)
-    $totalProducto = ($detalle['precio'] * $detalle['cantidad']) + $totalExtras;
+    if (!empty($detalle['es_cortesia'])) {
+
+        $totalProducto = 0;
+
+    } else {
+
+        $totalProducto = ($detalle['precio'] * $detalle['cantidad']) + $totalExtras;
+
+    }
 
     $detalle['total_producto'] = $totalProducto;
     
@@ -169,15 +184,46 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
                 <tbody>
                     <?php foreach($detalles as $detalle) { ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($detalle['producto_nombre']); ?></td>
-                            <td><?php echo $detalle['cantidad']; ?></td>
-                            <td>$ <?php echo number_format($detalle['precio'], 0, ',', '.'); ?></td>
+                            <td>
+                                <?php echo htmlspecialchars($detalle['producto_nombre']); ?>
+
+                                <?php if (!empty($detalle['es_cortesia'])) { ?>
+                                    <br>
+                                    <span class="badge bg-warning text-dark">
+                                        🎁 Cortesía
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        <?php echo htmlspecialchars($detalle['motivo_cortesia'] ?? 'Sin motivo'); ?>
+                                    </small>
+                                <?php } ?>
+                            </td>
+
+                            <td>
+                                <?php echo (int)$detalle['cantidad']; ?>
+                            </td>
+
+                            <td>
+                                <?php if (!empty($detalle['es_cortesia'])) { ?>
+                                    <span class="text-success fw-bold">$ 0</span>
+                                    <br>
+                                    <small class="text-muted text-decoration-line-through">
+                                        $ <?php echo number_format($detalle['precio_original'], 0, ',', '.'); ?>
+                                    </small>
+                                <?php } else { ?>
+                                    $ <?php echo number_format($detalle['precio'], 0, ',', '.'); ?>
+                                <?php } ?>
+                            </td>
+
                             <td>
                                 <?php if (!empty($detalle['sabores'])) { ?>
                                     <strong>Sabores:</strong>
                                     <ul class="mb-2">
                                         <?php foreach($detalle['sabores'] as $sabor) { ?>
-                                            <li><?php echo htmlspecialchars($sabor['nombre']); ?> x<?php echo $sabor['cantidad']; ?></li>
+                                            <li>
+                                                <?php echo htmlspecialchars($sabor['nombre']); ?>
+                                                x<?php echo (int)$sabor['cantidad']; ?>
+                                            </li>
                                         <?php } ?>
                                     </ul>
                                 <?php } ?>
@@ -201,17 +247,20 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
                                 <?php } ?>
                             </td>
 
-                            <td>$ <?php echo number_format($detalle['total_producto'], 0, ',', '.'); ?></td>
+                            <td>
+                                $ <?php echo number_format($detalle['total_producto'], 0, ',', '.'); ?>
+                            </td>
                         </tr>
                     <?php } ?>
 
                     <?php if (count($detalles) == 0) { ?>
                         <tr>
-                            <td colspan="5" class="text-center text-muted">No hay detalles en esta venta</td>
+                            <td colspan="5" class="text-center text-muted">
+                                No hay detalles en esta venta
+                            </td>
                         </tr>
                     <?php } ?>
-                    
-                </tbody>
+                </tbody>                
             </table>
         </div>
 
@@ -221,7 +270,7 @@ while ($detalle = $detallesQuery->fetch_assoc()) {
 
         <?php } else { ?>
 
-            <a href="reporte_ventas.php" class="btn btn-secondary"">Ver Reportes</a>
+            <a href="reporte_ventas.php" class="btn btn-secondary">Ver Reportes</a>
 
         <?php } ?>
     </div>

@@ -934,19 +934,64 @@ function actualizarCantidad(index, nuevaCantidad) {
     if (!carrito[index]) return;
 
     const cantidadNormalizada = Math.max(1, parseInt(nuevaCantidad, 10) || 1);
-    const valorUnitario = carrito[index].subtotal / carrito[index].cantidad;
     const subtotalAnterior = carrito[index].subtotal;
 
-    carrito[index].cantidad = cantidadNormalizada;
-    carrito[index].subtotal = valorUnitario * cantidadNormalizada;
-    total += carrito[index].subtotal - subtotalAnterior;
+    if (carrito[index].es_cortesia) {
+        carrito[index].cantidad = cantidadNormalizada;
+        carrito[index].subtotal = 0;
+    } else {
+        const valorUnitario = carrito[index].subtotal / carrito[index].cantidad;
+        carrito[index].cantidad = cantidadNormalizada;
+        carrito[index].subtotal = valorUnitario * cantidadNormalizada;
+        total += carrito[index].subtotal - subtotalAnterior;
+    }
 
+    recalcularTotalCarrito();
     renderCarrito();
 }
 
 function eliminar(index) {
     total -= carrito[index].subtotal;
     carrito.splice(index, 1);
+    renderCarrito();
+}
+function alternarCortesia(index) {
+    if (!carrito[index]) return;
+
+    const item = carrito[index];
+
+    if (item.es_cortesia) {
+        const cantidad = parseInt(item.cantidad, 10) || 1;
+        const precioOriginal = parseFloat(item.precio_original) || parseFloat(item.precio_base) || 0;
+
+        item.es_cortesia = false;
+        item.motivo_cortesia = '';
+        item.subtotal = precioOriginal * cantidad;
+        item.precio_original = 0;
+
+        recalcularTotalCarrito();
+        renderCarrito();
+        return;
+    }
+
+    const motivo = prompt('Motivo de la cortesía. Ej: Promo alas familiar + fresa gratis');
+
+    if (motivo === null) return;
+
+    if (motivo.trim() === '') {
+        alert('Debes escribir un motivo para aplicar la cortesía.');
+        return;
+    }
+
+    const cantidad = parseInt(item.cantidad, 10) || 1;
+    const valorUnitarioOriginal = obtenerValorUnitarioLinea(item);
+
+    item.es_cortesia = true;
+    item.motivo_cortesia = motivo.trim();
+    item.precio_original = valorUnitarioOriginal;
+    item.subtotal = 0;
+
+    recalcularTotalCarrito();
     renderCarrito();
 }
 
@@ -980,7 +1025,20 @@ function vaciarCarrito() {
     actualizarResumenPagos();
     limpiarExtrasSeleccionados();
 }
+function obtenerValorUnitarioLinea(item) {
+    const cantidad = parseInt(item.cantidad, 10) || 1;
+    return cantidad > 0 ? (parseFloat(item.subtotal) || 0) / cantidad : 0;
+}
 
+function calcularSubtotalOriginalLinea(item) {
+    const cantidad = parseInt(item.cantidad, 10) || 1;
+
+    if (item.es_cortesia) {
+        return (parseFloat(item.precio_original) || 0) * cantidad;
+    }
+
+    return parseFloat(item.subtotal) || 0;
+}
 /* ─── Render carrito ─────────────────────────────────────── */
 function formatearPeso(valor) {
     return new Intl.NumberFormat('es-CO').format(Math.round(valor));
@@ -1042,6 +1100,11 @@ function renderCarrito() {
                     <td>
                         <div class="d-flex flex-column gap-1">
                             <button class="btn btn-outline-primary btn-sm" onclick="abrirModalEditarCarrito(${index})">Editar</button>
+
+                            <button class="btn btn-outline-warning btn-sm" onclick="alternarCortesia(${index})">
+                                ${item.es_cortesia ? 'Quitar cortesía' : 'Cortesía'}
+                            </button>
+
                             <button class="btn btn-danger btn-sm" onclick="eliminar(${index})">X</button>
                         </div>
                     </td>
@@ -1248,6 +1311,15 @@ function renderResumenPedido() {
             });
         }
 
+        if (item.es_cortesia) {
+            chipsConfig.push(`
+                <span class="rc-chip rc-chip--cortesia">
+                    🎁 Cortesía
+                    <small>${item.motivo_cortesia || 'Sin motivo'}</small>
+                </span>
+            `);
+        }
+
         const configRow = chipsConfig.length > 0
             ? `<div class="rc-config">${chipsConfig.join('')}</div>`
             : '';
@@ -1276,11 +1348,23 @@ function renderResumenPedido() {
                             oninput="actualizarCantidad(${index}, this.value)"
                         >`}
                 </div>
-                <div class="rc-price">$&thinsp;${formatearPeso(valorUnitario)}</div>
+                <div class="rc-price">
+                    ${item.es_cortesia
+                        ? `<span class="precio-cortesia">$ 0</span><small class="precio-original">$ ${formatearPeso(item.precio_original)}</small>`
+                        : `$&thinsp;${formatearPeso(valorUnitario)}`
+                    }
+                </div>
                 <div class="rc-total-cell">
-                    <div class="rc-total">$&thinsp;${formatearPeso(item.subtotal)}</div>
+                    <div class="rc-total">
+                        ${item.es_cortesia ? '$ 0' : `$&thinsp;${formatearPeso(item.subtotal)}`}
+                    </div>
                     <div class="rc-actions">
                         <button class="rc-btn rc-btn--edit" onclick="abrirModalEditarCarrito(${index})">Editar</button>
+
+                        <button class="rc-btn rc-btn--gift" onclick="alternarCortesia(${index})">
+                            ${item.es_cortesia ? 'Cobrar' : 'Cortesía'}
+                        </button>
+
                         <button class="rc-btn rc-btn--del" onclick="eliminar(${index})">Quitar</button>
                     </div>
                 </div>

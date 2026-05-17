@@ -94,7 +94,11 @@ try {
 
     $venta_id = $conn->insert_id;
 
-    $stmtDetalle = $conn->prepare("INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)");
+   $stmtDetalle = $conn->prepare("
+    INSERT INTO detalle_venta 
+    (venta_id, producto_id, cantidad, precio, es_cortesia, motivo_cortesia, precio_original)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
     $stmtExtra = $conn->prepare("INSERT INTO detalle_venta_extras (detalle_venta_id, extra_id, precio) VALUES (?, ?, ?)");
     $stmtSabor = $conn->prepare("INSERT INTO detalle_venta_sabores (detalle_venta_id, sabor_id, cantidad) VALUES (?, ?, ?)");   
     $stmtPago = $conn->prepare("INSERT INTO venta_pagos (venta_id, metodo_pago, monto) VALUES (?, ?, ?)");
@@ -102,9 +106,22 @@ try {
     foreach ($carrito as $item) {
         $producto_id = (int)$item['id'];
         $cantidad = (int)$item['cantidad'];
-        $precioBase = (float)$item['precio_base'];
+        $precio = !empty($item['es_cortesia']) ? 0 : (float)$item['precio_base'];
 
-        $stmtDetalle->bind_param("iiid", $venta_id, $producto_id, $cantidad, $precioBase);
+        $esCortesia = !empty($item['es_cortesia']) ? 1 : 0;
+        $motivoCortesia = $item['motivo_cortesia'] ?? null;
+        $precioOriginal = isset($item['precio_original']) ? (float)$item['precio_original'] : 0;
+
+        $stmtDetalle->bind_param(
+            "iiidisd",
+            $venta_id,
+            $producto_id,
+            $cantidad,
+            $precio,
+            $esCortesia,
+            $motivoCortesia,
+            $precioOriginal
+        );
 
         if (!$stmtDetalle->execute()) {
             throw new Exception("Error al guardar detalle: " . $stmtDetalle->error);
